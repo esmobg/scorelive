@@ -12,13 +12,13 @@ interface BrandMarkProps {
 const sizes = {
   sm: "h-8 w-8",
   md: "h-10 w-10",
-  lg: "h-14 w-14 sm:h-16 sm:w-16",
+  lg: "h-12 w-12 sm:h-16 sm:w-16",
 } as const;
 
 const wordSizes = {
   sm: "text-xl",
   md: "text-2xl",
-  lg: "text-5xl sm:text-7xl",
+  lg: "text-3xl sm:text-7xl",
 } as const;
 
 export function BrandMark({

@@ -206,14 +206,16 @@
 }
 
 .hero-panel {
-  min-height: min(68vh, 36rem);
+  min-height: auto;
   display: flex;
   align-items: flex-end;
+  padding-bottom: 1.5rem;
 }
 
 @media (min-width: 640px) {
   .hero-panel {
     min-height: min(78vh, 42rem);
+    padding-bottom: 0;
   }
 }
 
