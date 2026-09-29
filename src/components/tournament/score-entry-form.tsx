@@ -17,7 +17,7 @@ interface ScoreEntryFormProps {
     matchId: string,
     homeScore: number,
     awayScore: number,
-  ) => void;
+  ) => void | Promise<void>;
 }
 
 export function ScoreEntryForm({

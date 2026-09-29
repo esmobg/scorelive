@@ -1,4 +1,12 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function loginAsAdmin(page: Page) {
+  await page.goto("/login");
+  await page.getByLabel("Потребителско име").fill("admin");
+  await page.getByLabel("Парола").fill("turnyfly-demo");
+  await page.getByRole("button", { name: "Вход" }).click();
+  await expect(page).toHaveURL(/\/organize/);
+}
 
 test.describe("Turnyfly smoke", () => {
   test("skip link moves focus to main content", async ({ page }) => {
@@ -30,7 +38,16 @@ test.describe("Turnyfly smoke", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "bg");
   });
 
+  test("guest is redirected from organize to login", async ({ page }) => {
+    await page.goto("/organize");
+    await expect(page).toHaveURL(/\/login/);
+    await expect(
+      page.getByRole("heading", { name: "Вход за организатор" }),
+    ).toBeVisible();
+  });
+
   test("keyboard create flow reaches team management", async ({ page }) => {
+    await loginAsAdmin(page);
     await page.goto("/organize");
     await expect(page.getByLabel("Име на турнира")).toBeVisible();
     await page.getByLabel("Име на турнира").fill("Тестов турнир");
@@ -65,7 +82,46 @@ test.describe("Turnyfly smoke", () => {
     ).toBeVisible();
   });
 
+  test("league demo shows standings table", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Възстанови демо" }).click();
+    await page.goto("/tournaments/demo-league");
+    await expect(
+      page.getByRole("heading", { name: "Есенно първенство Бургас" }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Първенство · 2026-09-01/),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("tab", { name: "Класиране" }),
+    ).toBeVisible();
+  });
+
+  test("about and faq content pages render", async ({ page }) => {
+    await page.goto("/about");
+    await expect(page.getByRole("heading", { name: "За Turnyfly" })).toBeVisible();
+    await page.goto("/faq");
+    await expect(
+      page.getByRole("heading", { name: "Често задавани въпроси" }),
+    ).toBeVisible();
+  });
+
+  test("favorite toggle adds tournament to favorites page", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Възстанови демо" }).click();
+    const firstHeart = page
+      .getByRole("button", { name: "Добави в любими" })
+      .first();
+    await firstHeart.click();
+    await page.goto("/favorites");
+    await expect(
+      page.getByRole("heading", { name: "Любими турнири" }),
+    ).toBeVisible();
+    await expect(page.getByRole("article").first()).toBeVisible();
+  });
+
   test("score entry announces via live region", async ({ page }) => {
+    await loginAsAdmin(page);
     await page.goto("/");
     await expect(
       page.getByRole("button", { name: "Възстанови демо" }),

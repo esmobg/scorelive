@@ -3,7 +3,10 @@ import { Manrope, Unbounded } from "next/font/google";
 import { SkipLink } from "@/components/a11y/skip-link";
 import { SiteFooter, SiteHeader } from "@/components/layout/site-shell";
 import { LocaleProvider } from "@/i18n/locale-provider";
+import { AuthProvider } from "@/lib/auth/auth-provider";
+import { FavoritesProvider } from "@/lib/favorites-provider";
 import { TournamentStoreProvider } from "@/lib/storage/use-tournament-store";
+import { SITE_URL } from "@/lib/social";
 import "./globals.css";
 
 const display = Unbounded({
@@ -19,15 +22,36 @@ const body = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Turnyfly — турнирната платформа",
     template: "%s · Turnyfly",
   },
   description:
-    "Отворена платформа за турнири: организирайте групи и елиминации, въвеждайте резултати и следете класирането.",
+    "Отворена платформа за турнири: организирайте групи, елиминации и първенства, въвеждайте резултати и следете класирането.",
+  openGraph: {
+    type: "website",
+    locale: "bg_BG",
+    alternateLocale: ["en_US"],
+    siteName: "Turnyfly",
+    title: "Turnyfly — турнирната платформа",
+    description:
+      "Отворена платформа за турнири: групи, елиминации, първенства и живо класиране.",
+    url: SITE_URL,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Turnyfly — турнирната платформа",
+    description:
+      "Отворена платформа за турнири: групи, елиминации, първенства и живо класиране.",
+  },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="bg"
@@ -35,14 +59,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col font-[family-name:var(--font-body)]">
         <LocaleProvider>
-          <TournamentStoreProvider>
-            <SkipLink />
-            <SiteHeader />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter />
-          </TournamentStoreProvider>
+          <AuthProvider>
+            <FavoritesProvider>
+              <TournamentStoreProvider>
+                <SkipLink />
+                <SiteHeader />
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+                <SiteFooter />
+              </TournamentStoreProvider>
+            </FavoritesProvider>
+          </AuthProvider>
         </LocaleProvider>
       </body>
     </html>

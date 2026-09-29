@@ -21,7 +21,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const formats: TournamentFormat[] = ["groups", "knockout", "groups_knockout"];
+const formats: TournamentFormat[] = [
+  "groups",
+  "knockout",
+  "groups_knockout",
+  "league",
+];
 
 export function OrganizeCreatePage() {
   const router = useRouter();
@@ -132,7 +137,8 @@ export function OrganizeCreatePage() {
               if (
                 value === "groups" ||
                 value === "knockout" ||
-                value === "groups_knockout"
+                value === "groups_knockout" ||
+                value === "league"
               ) {
                 setFormat(value);
               }
@@ -152,7 +158,7 @@ export function OrganizeCreatePage() {
             </SelectContent>
           </Select>
         </div>
-        {format !== "knockout" ? (
+        {format === "groups" || format === "groups_knockout" ? (
           <div className="space-y-1.5">
             <Label htmlFor={`${formId}-groups`}>{t("organize.groupCount")}</Label>
             <Input

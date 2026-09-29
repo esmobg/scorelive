@@ -134,7 +134,19 @@ export function OrganizeManagePage() {
     setLiveMessage(t("manage.fixturesGenerated"));
   }
 
-  function handleScore(matchId: string, homeScore: number, awayScore: number) {
+  async function handleScore(
+    matchId: string,
+    homeScore: number,
+    awayScore: number,
+  ) {
+    const authRes = await fetch("/api/scores/authorize", {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!authRes.ok) {
+      window.location.href = `/login?next=${encodeURIComponent(`/organize/${id}`)}`;
+      return;
+    }
     const match = tournament!.matches.find((m) => m.id === matchId);
     const next = setMatchScore(tournament!, matchId, homeScore, awayScore);
     save(next);

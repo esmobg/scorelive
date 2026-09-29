@@ -1,4 +1,4 @@
-import { generateGroupStage } from "./groups";
+import { generateGroupStage, generateRoundRobinMatches } from "./groups";
 import { applyKnockoutScore, generateKnockoutBracket } from "./knockout";
 import { computeStandings, topTeamIds } from "./standings";
 import type {
@@ -108,6 +108,15 @@ export function generateFixtures(tournament: Tournament): Tournament {
         ...tournament,
         groups,
         matches: groupMatches,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    case "league": {
+      const matches = generateRoundRobinMatches(teams);
+      return {
+        ...tournament,
+        groups: [],
+        matches,
         updatedAt: new Date().toISOString(),
       };
     }

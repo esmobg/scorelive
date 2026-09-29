@@ -12,8 +12,23 @@ export function DiscoverHome() {
   const { tournaments, ready, reset } = useTournamentStore();
   const { t } = useLocale();
 
+  const howSteps = [
+    {
+      title: t("home.howStep1Title"),
+      body: t("home.howStep1Body"),
+    },
+    {
+      title: t("home.howStep2Title"),
+      body: t("home.howStep2Body"),
+    },
+    {
+      title: t("home.howStep3Title"),
+      body: t("home.howStep3Body"),
+    },
+  ] as const;
+
   return (
-    <div className="space-y-16">
+    <div className="space-y-16 pb-16">
       <section
         className="hero-panel relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24"
         aria-labelledby="hero-heading"
@@ -67,7 +82,12 @@ export function DiscoverHome() {
               {t("home.tournamentsLead")}
             </p>
           </div>
-          <Button type="button" variant="ghost" className="min-h-11" onClick={() => reset()}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="min-h-11"
+            onClick={() => reset()}
+          >
             {t("home.resetDemo")}
           </Button>
         </div>
@@ -88,6 +108,77 @@ export function DiscoverHome() {
             ))}
           </div>
         )}
+      </section>
+
+      <section
+        className="mx-auto w-full max-w-6xl px-4 sm:px-6"
+        aria-labelledby="how-heading"
+      >
+        <div className="mb-8 max-w-2xl space-y-2">
+          <h2
+            id="how-heading"
+            className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[var(--tf-ink)]"
+          >
+            {t("home.howHeading")}
+          </h2>
+          <p className="text-[var(--tf-ink-muted)]">{t("home.howLead")}</p>
+        </div>
+        <ol className="grid gap-8 sm:grid-cols-3">
+          {howSteps.map((step, index) => (
+            <li key={step.title} className="space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-wide text-[var(--tf-accent-deep)]">
+                {index + 1}
+              </p>
+              <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[var(--tf-ink)]">
+                {step.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-[var(--tf-ink-muted)]">
+                {step.body}
+              </p>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-8">
+          <Link
+            href="/how-it-works"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--tf-accent-deep)] underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+          >
+            {t("home.howCta")}
+          </Link>
+        </p>
+      </section>
+
+      <section
+        className="border-y border-[var(--tf-line)] bg-[var(--tf-foam)]/60"
+        aria-labelledby="cta-heading"
+      >
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-12 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="max-w-xl space-y-2">
+            <h2
+              id="cta-heading"
+              className="font-[family-name:var(--font-display)] text-2xl font-semibold text-[var(--tf-ink)] sm:text-3xl"
+            >
+              {t("home.ctaSectionHeading")}
+            </h2>
+            <p className="text-[var(--tf-ink-muted)]">
+              {t("home.ctaSectionLead")}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/organize"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+            >
+              {t("home.ctaSectionOrganize")}
+            </Link>
+            <Link
+              href="/about"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-border px-5 text-sm font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+            >
+              {t("home.ctaSectionAbout")}
+            </Link>
+          </div>
+        </div>
       </section>
     </div>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { Tournament, TournamentFormat } from "@/lib/tournament";
 import { Badge } from "@/components/ui/badge";
+import { FavoriteToggle } from "@/components/tournament/favorite-toggle";
 import { formatLabel } from "@/i18n";
 import { useLocale } from "@/i18n/locale-provider";
 
@@ -33,9 +34,12 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
             {tournament.sport} · {tournament.startDate} — {tournament.endDate}
           </p>
         </div>
-        <Badge variant="secondary">
-          {formatLabel(tournament.format, t)}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <FavoriteToggle tournamentId={tournament.id} />
+          <Badge variant="secondary">
+            {formatLabel(tournament.format, t)}
+          </Badge>
+        </div>
       </div>
       <p className="text-sm text-[var(--tf-ink)]">
         {t("card.teamsPlayed", {
@@ -67,4 +71,5 @@ export const formatLabels: Record<TournamentFormat, string> = {
   groups: "Групи",
   knockout: "Елиминации",
   groups_knockout: "Групи → елиминации",
+  league: "Първенство",
 };

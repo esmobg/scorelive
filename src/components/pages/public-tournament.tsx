@@ -10,6 +10,8 @@ import { useLocale } from "@/i18n/locale-provider";
 import { StandingsTable } from "@/components/tournament/standings-table";
 import { BracketView } from "@/components/tournament/bracket-view";
 import { MatchList } from "@/components/tournament/match-list";
+import { FavoriteToggle } from "@/components/tournament/favorite-toggle";
+import { ShareTournament } from "@/components/tournament/share-tournament";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -95,14 +97,19 @@ export function PublicTournamentPage() {
             count: tournament.teams.length,
           })}
         </p>
-        <p>
+        <div className="flex flex-wrap items-center gap-3">
+          <FavoriteToggle tournamentId={tournament.id} />
           <Link
             href={`/organize/${tournament.id}`}
             className="inline-flex min-h-11 items-center text-sm font-medium underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
           >
             {t("public.editAsOrganizer")}
           </Link>
-        </p>
+        </div>
+        <ShareTournament
+          title={tournament.name}
+          path={`/tournaments/${tournament.id}`}
+        />
       </header>
 
       <Tabs

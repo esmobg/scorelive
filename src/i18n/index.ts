@@ -33,7 +33,7 @@ export function createTranslator(locale: Locale): TranslateFn {
 }
 
 export function formatLabel(
-  format: "groups" | "knockout" | "groups_knockout",
+  format: "groups" | "knockout" | "groups_knockout" | "league",
   t: TranslateFn,
 ): string {
   switch (format) {
@@ -43,6 +43,8 @@ export function formatLabel(
       return t("format.knockout");
     case "groups_knockout":
       return t("format.groups_knockout");
+    case "league":
+      return t("format.league");
     default: {
       const _exhaustive: never = format;
       return _exhaustive;

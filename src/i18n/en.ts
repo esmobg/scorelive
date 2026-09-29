@@ -3,7 +3,7 @@ import type { Messages } from "./bg";
 export const en = {
   "meta.title": "Turnyfly — tournament platform",
   "meta.description":
-    "Open tournament platform: organize groups and knockouts, enter scores, and follow standings.",
+    "Open tournament platform: organize groups, knockouts, and leagues, enter scores, and follow standings.",
 
   "brand.name": "Turnyfly",
   "brand.tagline": "Turnyfly — open tournament platform. MIT license.",
@@ -11,7 +11,15 @@ export const en = {
 
   "nav.home": "Home",
   "nav.organize": "Organize",
+  "nav.favorites": "Favorites",
+  "nav.about": "About",
+  "nav.howItWorks": "How it works",
+  "nav.faq": "FAQ",
+  "nav.login": "Log in",
+  "nav.logout": "Log out",
   "nav.main": "Main navigation",
+  "nav.footer": "Secondary navigation",
+  "nav.social": "Social networks",
   "nav.accessibility": "Accessibility",
   "nav.skip": "Skip to main content",
 
@@ -22,7 +30,7 @@ export const en = {
 
   "home.heroTitle": "Tournaments for organizers, players, and fans",
   "home.heroLead":
-    "Build groups and knockouts, enter scores, and share live standings — no accounts, no payments, accessibility from day one.",
+    "Build groups, knockouts, or a league table, enter scores, and share live standings — accessibility from day one.",
   "home.ctaOrganize": "Organize a tournament",
   "home.ctaFollow": "Follow tournaments",
   "home.tournamentsHeading": "Tournaments",
@@ -31,18 +39,39 @@ export const en = {
   "home.loading": "Loading tournaments…",
   "home.emptyTitle": "No tournaments",
   "home.emptyBody": "Create your first tournament or restore the demo data.",
+  "home.howHeading": "How it works",
+  "home.howLead":
+    "Three steps from idea to live standings — no paid plans.",
+  "home.howStep1Title": "Pick a format",
+  "home.howStep1Body":
+    "Choose groups, knockout, both, or a full league championship.",
+  "home.howStep2Title": "Add teams and scores",
+  "home.howStep2Body":
+    "Enter participants, generate fixtures, and keep results up to date.",
+  "home.howStep3Title": "Share the public page",
+  "home.howStep3Body":
+    "Fans follow standings and matches; you manage from the organizer panel.",
+  "home.howCta": "See details",
+  "home.ctaSectionHeading": "Ready to organize?",
+  "home.ctaSectionLead":
+    "Log in as admin to create tournaments, or browse the public demo data.",
+  "home.ctaSectionOrganize": "Go to organize",
+  "home.ctaSectionAbout": "More about Turnyfly",
 
   "card.teamsPlayed": "{teams} teams · {played}/{total} matches played",
   "card.follow": "Follow tournament",
   "card.manage": "Manage",
+  "card.favoriteAdd": "Add to favorites",
+  "card.favoriteRemove": "Remove from favorites",
 
   "format.groups": "Groups",
   "format.knockout": "Knockout",
   "format.groups_knockout": "Groups → knockout",
+  "format.league": "League",
 
   "organize.title": "Organize a tournament",
   "organize.lead":
-    "Universal format — groups, knockout, or both. Sport is free text.",
+    "Universal format — groups, knockout, both, or a league table. Sport is free text.",
   "organize.name": "Tournament name",
   "organize.sport": "Sport / discipline",
   "organize.sportPlaceholder": "e.g. Volleyball, Chess, Football",
@@ -104,6 +133,83 @@ export const en = {
   "public.tabMatches": "Matches",
   "public.standingsHeading": "Standings",
   "public.matchesHeading": "Matches",
+  "public.shareHeading": "Share",
+
+  "share.label": "Share this tournament",
+  "share.native": "Share",
+  "share.copy": "Copy link",
+  "share.copied": "Link copied",
+  "share.facebook": "Facebook",
+  "share.x": "X",
+
+  "favorites.title": "Favorite tournaments",
+  "favorites.lead":
+    "Saved tournaments stay in this browser. When you are logged in as admin, they also sync with your session.",
+  "favorites.loading": "Loading…",
+  "favorites.emptyTitle": "No favorites yet",
+  "favorites.emptyBody":
+    "Add a tournament with the heart icon on cards or the public page.",
+  "favorites.browse": "Browse tournaments",
+
+  "login.title": "Organizer log in",
+  "login.lead":
+    "Admin log in unlocks tournament creation and score entry.",
+  "login.username": "Username",
+  "login.password": "Password",
+  "login.submit": "Log in",
+  "login.error": "Invalid username or password.",
+  "login.loading": "Checking…",
+  "login.success": "Logged in successfully.",
+
+  "auth.requiredTitle": "Log in required",
+  "auth.requiredBody":
+    "Only administrators can organize tournaments and enter scores.",
+  "auth.goLogin": "Go to log in",
+
+  "about.title": "About Turnyfly",
+  "about.lead":
+    "Turnyfly is an open tournament platform — built for clubs, schools, and communities that want clear standings without heavy accounts.",
+  "about.body1":
+    "Organizers pick a format, add teams, and update scores. Players and fans follow public pages live.",
+  "about.body2":
+    "The project is MIT licensed, bilingual (BG/EN), and designed toward WCAG 2.2 Level AAA on core screens.",
+  "about.ctaOrganize": "Start a tournament",
+  "about.ctaA11y": "Accessibility",
+
+  "how.title": "How it works",
+  "how.lead":
+    "From create to share — a short flow with no cloud database in this version.",
+  "how.step1Title": "1. Create a tournament",
+  "how.step1Body":
+    "Log in as admin, choose a sport and format: groups, knockout, both, or league.",
+  "how.step2Title": "2. Add participants",
+  "how.step2Body":
+    "Enter teams with nationality and optional logos, then generate fixtures.",
+  "how.step3Title": "3. Enter scores",
+  "how.step3Body":
+    "Standings and brackets update immediately. In groups → knockout, winners advance automatically.",
+  "how.step4Title": "4. Share and save",
+  "how.step4Body":
+    "Send the public link, share on social, or heart the tournament as a favorite.",
+  "how.cta": "Organize now",
+
+  "faq.title": "Frequently asked questions",
+  "faq.lead": "Short answers about the demo and current capabilities.",
+  "faq.q1": "Do I need an account to follow a tournament?",
+  "faq.a1":
+    "No. Public pages, discovery, and favorites are open. An admin account is only required to organize and enter scores.",
+  "faq.q2": "Where is data stored?",
+  "faq.a2":
+    "Tournaments live in browser localStorage. Favorites do too; when an admin is logged in they also sync into the session cookie.",
+  "faq.q3": "What is the League format?",
+  "faq.a3":
+    "A single round-robin (each team plays every other once). Points are 3/1/0; standings sort by points → goal difference → goals for.",
+  "faq.q4": "Are there payments or OAuth?",
+  "faq.a4":
+    "Not in this version. No payments, email password reset, or external identity providers.",
+  "faq.q5": "How do I change language?",
+  "faq.a5":
+    "Use the BG/EN toggle in the header. The page lang attribute updates automatically.",
 
   "standings.empty": "No standings yet.",
   "standings.colRank": "#",

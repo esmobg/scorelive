@@ -170,8 +170,47 @@ function demoFootballGroups(): Tournament {
   return t;
 }
 
+function demoLeagueChampionship(): Tournament {
+  let t = createEmptyTournament({
+    name: "Есенно първенство Бургас",
+    sport: "Футбол",
+    startDate: "2026-09-01",
+    endDate: "2026-12-15",
+    format: "league",
+  });
+  t = { ...t, id: "demo-league" };
+
+  const roster: SeedTeam[] = [
+    { name: "Нефтохимик", countryCode: "BG" },
+    { name: "Черноморец", countryCode: "BG" },
+    { name: "Поморие", countryCode: "BG" },
+    { name: "Несебър", countryCode: "BG" },
+    { name: "Созопол", countryCode: "BG" },
+    { name: "Камено", countryCode: "BG" },
+  ];
+  for (const team of roster) {
+    t = addTeam(t, team);
+  }
+
+  t = generateFixtures(t);
+  const first = t.matches[0];
+  const second = t.matches[1];
+  if (first) {
+    t = setMatchScore(t, first.id, 2, 1);
+  }
+  if (second) {
+    t = setMatchScore(t, second.id, 0, 0);
+  }
+  return t;
+}
+
 export function getSeedTournaments(): Tournament[] {
-  return [demoVolleyball(), demoChessKnockout(), demoFootballGroups()];
+  return [
+    demoVolleyball(),
+    demoChessKnockout(),
+    demoFootballGroups(),
+    demoLeagueChampionship(),
+  ];
 }
 
 function persistV2(tournaments: Tournament[]): void {

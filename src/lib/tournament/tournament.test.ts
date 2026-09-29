@@ -137,4 +137,32 @@ describe("fixtures + score entry", () => {
       3,
     ); // 4 teams → 2+1
   });
+
+  it("builds a single round-robin league table", () => {
+    let tournament = createEmptyTournament({
+      name: "League",
+      sport: "Football",
+      startDate: "2026-01-01",
+      endDate: "2026-06-01",
+      format: "league",
+    });
+    for (const name of ["A", "B", "C", "D"]) {
+      tournament = addTeam(tournament, name);
+    }
+    tournament = generateFixtures(tournament);
+    expect(tournament.groups).toHaveLength(0);
+    expect(tournament.matches).toHaveLength(6);
+    expect(tournament.matches.every((m) => m.stage === "group")).toBe(true);
+
+    for (const match of tournament.matches) {
+      tournament = setMatchScore(tournament, match.id, 1, 0);
+    }
+
+    const standings = computeStandings(
+      tournament.teams.map((team) => team.id),
+      tournament.matches,
+    );
+    expect(standings.every((row) => row.played === 3)).toBe(true);
+    expect(standings[0].points).toBeGreaterThanOrEqual(standings[1].points);
+  });
 });

@@ -1,4 +1,8 @@
-export type TournamentFormat = "groups" | "knockout" | "groups_knockout";
+export type TournamentFormat =
+  | "groups"
+  | "knockout"
+  | "groups_knockout"
+  | "league";
 
 export type MatchStage = "group" | "knockout";
 
