@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { OrganizeManagePage } from "@/components/pages/organize-manage";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Управление на турнир",
 };

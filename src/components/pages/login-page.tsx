@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n/locale-provider";
 import { useAuth } from "@/lib/auth/auth-provider";
 import { loadLocalFavorites } from "@/lib/favorites";
@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 export function LoginPage() {
   const { t } = useLocale();
   const { refresh } = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const formId = useId();
   const [username, setUsername] = useState("");
@@ -42,7 +41,10 @@ export function LoginPage() {
       }
       await refresh();
       const next = searchParams.get("next") || "/organize";
-      router.replace(next.startsWith("/") ? next : "/organize");
+      const destination = next.startsWith("/") ? next : "/organize";
+      // Full navigation so middleware sees the new session cookie
+      // (client soft-nav can reuse a guest prefetch of /organize).
+      window.location.assign(destination);
     } catch {
       setError(t("login.error"));
       setPending(false);
