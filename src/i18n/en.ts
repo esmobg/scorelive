@@ -1,4 +1,4 @@
-import type { MessageKey, Messages } from "./bg";
+import type { Messages } from "./bg";
 
 export const en = {
   "meta.title": "Turnyfly — tournament platform",
