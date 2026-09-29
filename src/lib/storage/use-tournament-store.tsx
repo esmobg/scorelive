@@ -20,6 +20,7 @@ import {
 
 type StoreSnapshot = Tournament[];
 
+const EMPTY: StoreSnapshot = [];
 let memoryCache: StoreSnapshot | null = null;
 const listeners = new Set<() => void>();
 
@@ -31,9 +32,11 @@ function emit() {
 
 function readStore(): StoreSnapshot {
   if (typeof window === "undefined") {
-    return memoryCache ?? [];
+    return EMPTY;
   }
-  memoryCache = loadTournaments();
+  if (!memoryCache) {
+    memoryCache = loadTournaments();
+  }
   return memoryCache;
 }
 
@@ -53,7 +56,7 @@ function subscribe(listener: () => void) {
 }
 
 function getServerSnapshot(): StoreSnapshot {
-  return [];
+  return EMPTY;
 }
 
 interface TournamentStoreValue {
@@ -121,7 +124,9 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
 export function useTournamentStore(): TournamentStoreValue {
   const ctx = useContext(TournamentStoreContext);
   if (!ctx) {
-    throw new Error("useTournamentStore must be used within TournamentStoreProvider");
+    throw new Error(
+      "useTournamentStore must be used within TournamentStoreProvider",
+    );
   }
   return ctx;
 }

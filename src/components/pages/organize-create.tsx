@@ -135,8 +135,10 @@ export function OrganizeCreatePage() {
               }
             }}
           >
-            <SelectTrigger id={`${formId}-format`} className="w-full">
-              <SelectValue />
+            <SelectTrigger id={`${formId}-format`} className="w-full min-h-11">
+              <SelectValue placeholder="Изберете формат">
+                {formatLabels[format]}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {formats.map((f) => (
