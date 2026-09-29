@@ -30,7 +30,13 @@ function normalizeTeam(raw: RawTeam, index: number): Team | null {
     name,
     countryCode: normalizeCountryCode(raw.countryCode),
   };
-  if (typeof raw.logoDataUrl === "string" && raw.logoDataUrl.startsWith("data:")) {
+  if (
+    typeof raw.logoDataUrl === "string" &&
+    (raw.logoDataUrl.startsWith("data:image/png") ||
+      raw.logoDataUrl.startsWith("data:image/jpeg") ||
+      raw.logoDataUrl.startsWith("data:image/jpg") ||
+      raw.logoDataUrl.startsWith("data:image/webp"))
+  ) {
     team.logoDataUrl = raw.logoDataUrl;
   }
   return team;
@@ -49,9 +55,14 @@ function normalizeTournament(raw: unknown): Tournament | null {
         .map((team, i) => normalizeTeam(team, i))
         .filter((team): team is Team => Boolean(team))
     : [];
+  const ownerUsername =
+    typeof t.ownerUsername === "string" && t.ownerUsername.trim()
+      ? t.ownerUsername.trim()
+      : undefined;
   return {
     ...t,
     teams,
+    ...(ownerUsername ? { ownerUsername } : { ownerUsername: undefined }),
   };
 }
 

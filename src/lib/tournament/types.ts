@@ -61,6 +61,12 @@ export interface Tournament {
   groupCount: number;
   /** Teams advancing from each group into knockout. */
   advancePerGroup: number;
+  /**
+   * Soft client-side owner (localStorage only). When set, organize mutations
+   * should match the session username. Seed demos omit this. Residual risk:
+   * any same-origin script can still rewrite localStorage (C4).
+   */
+  ownerUsername?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -85,4 +91,5 @@ export interface CreateTournamentInput {
   format: TournamentFormat;
   groupCount?: number;
   advancePerGroup?: number;
+  ownerUsername?: string;
 }

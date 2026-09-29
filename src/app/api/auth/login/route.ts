@@ -1,16 +1,44 @@
 import { NextResponse } from "next/server";
 import { ORGANIZERS_COOKIE } from "@/lib/auth/organizers";
 import {
+  assertSameOrigin,
+  consumeAuthRateLimit,
+} from "@/lib/auth/request-guards";
+import {
   createSessionToken,
   FAVORITES_COOKIE,
   mergeFavoriteIds,
+  normalizeFavoriteIds,
   parseFavoriteIds,
   SESSION_COOKIE,
   sessionCookieOptions,
   verifyLoginCredentials,
 } from "@/lib/auth/session";
 
+function cookieValue(header: string, name: string): string | undefined {
+  return header
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+    ?.slice(name.length + 1);
+}
+
 export async function POST(request: Request) {
+  if (!assertSameOrigin(request)) {
+    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
+  }
+
+  const limited = consumeAuthRateLimit(request, "login");
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "rate_limited" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(limited.retryAfterSec) },
+      },
+    );
+  }
+
   let body: { username?: string; password?: string; favorites?: string[] };
   try {
     body = (await request.json()) as {
@@ -26,11 +54,7 @@ export async function POST(request: Request) {
   const password = typeof body.password === "string" ? body.password : "";
 
   const cookieHeader = request.headers.get("cookie") ?? "";
-  const organizersRaw = cookieHeader
-    .split(";")
-    .map((part) => part.trim())
-    .find((part) => part.startsWith(`${ORGANIZERS_COOKIE}=`))
-    ?.slice(ORGANIZERS_COOKIE.length + 1);
+  const organizersRaw = cookieValue(cookieHeader, ORGANIZERS_COOKIE);
 
   const ok = await verifyLoginCredentials(username, password, organizersRaw);
   if (!ok) {
@@ -41,15 +65,9 @@ export async function POST(request: Request) {
   const response = NextResponse.json({ ok: true, username });
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
 
-  const clientFavorites = Array.isArray(body.favorites)
-    ? body.favorites.filter((id): id is string => typeof id === "string")
-    : [];
+  const clientFavorites = normalizeFavoriteIds(body.favorites);
   const existing = parseFavoriteIds(
-    cookieHeader
-      .split(";")
-      .map((part) => part.trim())
-      .find((part) => part.startsWith(`${FAVORITES_COOKIE}=`))
-      ?.slice(FAVORITES_COOKIE.length + 1),
+    cookieValue(cookieHeader, FAVORITES_COOKIE),
   );
   const merged = mergeFavoriteIds(existing, clientFavorites);
   response.cookies.set(

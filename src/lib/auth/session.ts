@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
 import { verifyOrganizerCredentials } from "@/lib/auth/organizers";
 import {
   SESSION_COOKIE,
@@ -10,15 +11,19 @@ import {
 export {
   SESSION_COOKIE,
   FAVORITES_COOKIE,
+  MAX_FAVORITES,
   createSessionToken,
   verifySessionToken,
   sessionCookieOptions,
   parseFavoriteIds,
   mergeFavoriteIds,
+  normalizeFavoriteIds,
   type SessionPayload,
 } from "@/lib/auth/session-token";
 
-/** Demo admin — credentials documented in README only. */
+export { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
+
+/** Demo admin username — local/demo only unless DEMO_ADMIN_ENABLED=true. */
 export const DEMO_ADMIN_USERNAME =
   process.env.TURNYFLY_ADMIN_USERNAME?.trim() || "admin";
 
@@ -30,13 +35,16 @@ export async function verifyAdminCredentials(
   username: string,
   password: string,
 ): Promise<boolean> {
+  if (!isDemoAdminEnabled()) {
+    return false;
+  }
   if (username !== DEMO_ADMIN_USERNAME) {
     return false;
   }
   return bcrypt.compare(password, DEMO_PASSWORD_HASH);
 }
 
-/** Demo admin or a registered organizer (cookie-backed registry). */
+/** Demo admin (when enabled) or a registered organizer (HMAC-sealed cookie). */
 export async function verifyLoginCredentials(
   username: string,
   password: string,

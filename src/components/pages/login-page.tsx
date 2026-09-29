@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "@/i18n/locale-provider";
 import { useAuth } from "@/lib/auth/auth-provider";
+import { safeRedirectPath } from "@/lib/auth/safe-redirect";
 import { loadLocalFavorites } from "@/lib/favorites";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,8 +42,7 @@ export function LoginPage() {
         return;
       }
       await refresh();
-      const next = searchParams.get("next") || "/organize";
-      const destination = next.startsWith("/") ? next : "/organize";
+      const destination = safeRedirectPath(searchParams.get("next"), "/organize");
       // Full navigation so middleware sees the new session cookie
       // (client soft-nav can reuse a guest prefetch of /organize).
       window.location.assign(destination);

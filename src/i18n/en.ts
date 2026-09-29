@@ -57,7 +57,7 @@ export const en = {
   "home.howCta": "See details",
   "home.ctaSectionHeading": "Ready to organize?",
   "home.ctaSectionLead":
-    "Log in as admin to create tournaments, or browse the public demo data.",
+    "Log in or register as an organizer to create tournaments, or browse the public demo data.",
   "home.ctaSectionOrganize": "Go to organize",
   "home.ctaSectionAbout": "More about ScoreLive",
 
@@ -93,6 +93,9 @@ export const en = {
   "manage.loading": "Loading…",
   "manage.notFoundTitle": "Tournament not found",
   "manage.notFoundBody": "Check the address or create a new tournament.",
+  "manage.forbiddenTitle": "Not your tournament",
+  "manage.forbiddenBody":
+    "This tournament is owned by another organizer in this browser. Soft client-side check only — data still lives in localStorage.",
   "manage.backOrganize": "Back to organize",
   "manage.publicLink": "Public follow page",
   "manage.tabsLabel": "Management sections",
@@ -102,7 +105,7 @@ export const en = {
   "manage.teamName": "New team / participant",
   "manage.country": "Country",
   "manage.logo": "Logo (optional)",
-  "manage.logoHelp": "PNG, JPEG, or SVG up to 2 MB. Compressed locally.",
+  "manage.logoHelp": "PNG, JPEG, or WebP up to 2 MB. Compressed locally (no SVG).",
   "manage.logoClear": "Remove logo",
   "manage.addTeam": "Add",
   "manage.removeTeam": "Remove",
@@ -111,7 +114,7 @@ export const en = {
   "manage.errorTeamName": "Enter a team name.",
   "manage.errorCountry": "Choose a country.",
   "manage.errorMinTeams": "Add at least two teams before generating.",
-  "manage.errorLogoType": "Logo must be PNG, JPEG, or SVG.",
+  "manage.errorLogoType": "Logo must be PNG, JPEG, or WebP.",
   "manage.errorLogoSize": "File is too large (max 2 MB).",
   "manage.errorLogoRead": "Could not read the image.",
   "manage.fixturesEmpty":

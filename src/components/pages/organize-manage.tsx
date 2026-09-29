@@ -11,7 +11,9 @@ import {
 } from "@/lib/tournament";
 import { COUNTRIES, countryDisplayName } from "@/lib/countries";
 import { compressLogoFile } from "@/lib/logo-compress";
+import { useAuth } from "@/lib/auth/auth-provider";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
+import type { Tournament } from "@/lib/tournament";
 import { formatLabel } from "@/i18n";
 import { useLocale } from "@/i18n/locale-provider";
 import { LiveScoreRegion } from "@/components/a11y/live-score-region";
@@ -31,10 +33,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+/** Soft ACL: seed demos (no owner) stay editable; owned tournaments require match. */
+function canMutateTournament(
+  tournament: Tournament,
+  username: string | null,
+): boolean {
+  if (!tournament.ownerUsername) {
+    return true;
+  }
+  return Boolean(username) && tournament.ownerUsername === username;
+}
+
 export function OrganizeManagePage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
   const { getById, save, ready } = useTournamentStore();
+  const { username } = useAuth();
   const tournament = getById(id);
   const { locale, t } = useLocale();
   const [teamName, setTeamName] = useState("");
@@ -68,6 +82,23 @@ export function OrganizeManagePage() {
         <Alert>
           <AlertTitle>{t("manage.notFoundTitle")}</AlertTitle>
           <AlertDescription>{t("manage.notFoundBody")}</AlertDescription>
+        </Alert>
+        <Link
+          href="/organize"
+          className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+        >
+          {t("manage.backOrganize")}
+        </Link>
+      </div>
+    );
+  }
+
+  if (!canMutateTournament(tournament, username)) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-4 px-4 py-10">
+        <Alert>
+          <AlertTitle>{t("manage.forbiddenTitle")}</AlertTitle>
+          <AlertDescription>{t("manage.forbiddenBody")}</AlertDescription>
         </Alert>
         <Link
           href="/organize"
@@ -242,7 +273,7 @@ export function OrganizeManagePage() {
               <Input
                 id="team-logo"
                 type="file"
-                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                accept="image/png,image/jpeg,image/webp"
                 className="min-h-11 cursor-pointer pt-2"
                 onChange={(e) => {
                   void handleLogoChange(e.target.files?.[0] ?? null);

@@ -55,7 +55,7 @@ export const bg = {
   "home.howCta": "Виж подробности",
   "home.ctaSectionHeading": "Готови ли сте да организирате?",
   "home.ctaSectionLead":
-    "Влезте като администратор, за да създавате турнири, или разгледайте публичните демо данни.",
+    "Влезте или се регистрирайте като организатор, за да създавате турнири, или разгледайте публичните демо данни.",
   "home.ctaSectionOrganize": "Към организиране",
   "home.ctaSectionAbout": "Повече за ScoreLive",
 
@@ -91,6 +91,9 @@ export const bg = {
   "manage.loading": "Зареждане…",
   "manage.notFoundTitle": "Турнирът не е намерен",
   "manage.notFoundBody": "Проверете адреса или създайте нов турнир.",
+  "manage.forbiddenTitle": "Това не е ваш турнир",
+  "manage.forbiddenBody":
+    "Този турнир е на друг организатор в този браузър. Мека клиентска проверка — данните са все още в localStorage.",
   "manage.backOrganize": "Към организиране",
   "manage.publicLink": "Публична страница за следене",
   "manage.tabsLabel": "Секции за управление",
@@ -100,7 +103,7 @@ export const bg = {
   "manage.teamName": "Нов отбор / участник",
   "manage.country": "Държава",
   "manage.logo": "Лого (по избор)",
-  "manage.logoHelp": "PNG, JPEG или SVG до 2 MB. Компресира се локално.",
+  "manage.logoHelp": "PNG, JPEG или WebP до 2 MB. Компресира се локално (без SVG).",
   "manage.logoClear": "Премахни логото",
   "manage.addTeam": "Добави",
   "manage.removeTeam": "Премахни",
@@ -109,7 +112,7 @@ export const bg = {
   "manage.errorTeamName": "Въведете име на отбор.",
   "manage.errorCountry": "Изберете държава.",
   "manage.errorMinTeams": "Добавете поне два отбора преди генериране.",
-  "manage.errorLogoType": "Логото трябва да е PNG, JPEG или SVG.",
+  "manage.errorLogoType": "Логото трябва да е PNG, JPEG или WebP.",
   "manage.errorLogoSize": "Файлът е твърде голям (макс. 2 MB).",
   "manage.errorLogoRead": "Неуспешно зареждане на изображението.",
   "manage.fixturesEmpty":

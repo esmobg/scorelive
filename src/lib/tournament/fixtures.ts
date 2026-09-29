@@ -12,6 +12,8 @@ import { normalizeCountryCode } from "@/lib/countries";
 
 export function createEmptyTournament(input: CreateTournamentInput): Tournament {
   const now = new Date().toISOString();
+  const owner =
+    typeof input.ownerUsername === "string" ? input.ownerUsername.trim() : "";
   return {
     id: createId("t"),
     name: input.name.trim(),
@@ -24,6 +26,7 @@ export function createEmptyTournament(input: CreateTournamentInput): Tournament 
     matches: [],
     groupCount: input.groupCount ?? 2,
     advancePerGroup: input.advancePerGroup ?? 2,
+    ...(owner ? { ownerUsername: owner } : {}),
     createdAt: now,
     updatedAt: now,
   };

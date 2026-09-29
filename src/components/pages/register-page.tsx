@@ -14,6 +14,8 @@ type RegisterErrorCode =
   | "invalid_password"
   | "password_mismatch"
   | "username_taken"
+  | "registration_failed"
+  | "rate_limited"
   | "generic";
 
 export function RegisterPage() {
@@ -36,6 +38,8 @@ export function RegisterPage() {
         return t("register.errorMismatch");
       case "username_taken":
         return t("register.errorTaken");
+      case "registration_failed":
+      case "rate_limited":
       case "generic":
         return t("register.error");
       default: {
@@ -77,7 +81,9 @@ export function RegisterPage() {
           code === "invalid_username" ||
           code === "invalid_password" ||
           code === "password_mismatch" ||
-          code === "username_taken"
+          code === "username_taken" ||
+          code === "registration_failed" ||
+          code === "rate_limited"
         ) {
           setError(messageFor(code));
         } else {

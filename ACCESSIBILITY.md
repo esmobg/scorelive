@@ -31,7 +31,9 @@ ScoreLive aims for **WCAG 2.2 Level AAA** for the MVP surfaces (discover, organi
 ## Known MVP limits
 
 - Knockout draws are rejected (must pick a winner) — communicated as an inline alert
-- Demo data lives in `localStorage` only (no multi-user sync)
+- Demo data lives in `localStorage` only (no multi-user sync); soft `ownerUsername` ACL is client-side only
+- Built-in demo admin is local/e2e only unless `DEMO_ADMIN_ENABLED=true` on the deployment
+- Team logos accept raster images only (PNG/JPEG/WebP) — SVG uploads are rejected
 - Third-party browser extensions may affect focus order
 - Flag glyphs depend on OS emoji fonts; ISO code remains the non-color cue
 

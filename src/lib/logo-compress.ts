@@ -6,11 +6,11 @@ export type LogoCompressResult =
   | { ok: true; dataUrl: string }
   | { ok: false; error: "type" | "size" | "read" };
 
+/** Raster-only — SVG rejected (scriptable XML risk). */
 const ALLOWED = new Set([
   "image/png",
   "image/jpeg",
   "image/jpg",
-  "image/svg+xml",
   "image/webp",
 ]);
 
@@ -39,8 +39,8 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Read a team logo file and produce a compressed data URL for localStorage.
- * SVG is stored as-is (already small); raster images are resized via canvas.
+ * Read a team logo file and produce a compressed JPEG data URL for localStorage.
+ * SVG and other non-raster types are rejected.
  */
 export async function compressLogoFile(file: File): Promise<LogoCompressResult> {
   if (!ALLOWED.has(file.type)) {
@@ -51,15 +51,15 @@ export async function compressLogoFile(file: File): Promise<LogoCompressResult> 
   }
 
   try {
-    if (file.type === "image/svg+xml") {
-      const dataUrl = await readAsDataUrl(file);
-      if (dataUrl.length > 180_000) {
-        return { ok: false, error: "size" };
-      }
-      return { ok: true, dataUrl };
-    }
-
     const original = await readAsDataUrl(file);
+    if (
+      !original.startsWith("data:image/png") &&
+      !original.startsWith("data:image/jpeg") &&
+      !original.startsWith("data:image/jpg") &&
+      !original.startsWith("data:image/webp")
+    ) {
+      return { ok: false, error: "type" };
+    }
     const img = await loadImage(original);
     const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height, 1));
     const width = Math.max(1, Math.round(img.width * scale));

@@ -1,7 +1,8 @@
 import bcrypt from "bcryptjs";
+import { sealJson, unsealJson } from "@/lib/auth/crypto-seal";
 import { sessionCookieOptions } from "@/lib/auth/session-token";
 
-/** Cookie holds registered organizers for demo persistence across serverless invokes. */
+/** Cookie holds HMAC-sealed registered organizers (demo persistence). */
 export const ORGANIZERS_COOKIE = "turnyfly_organizers";
 
 const DEMO_ADMIN_USERNAME =
@@ -24,71 +25,47 @@ function memoryStore(): Map<string, string> {
   return g.__scoreliveOrganizers;
 }
 
-function toBase64Url(text: string): string {
-  const bytes = new TextEncoder().encode(text);
-  let binary = "";
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
+function isOrganizerList(value: unknown): value is StoredOrganizer[] {
+  if (!Array.isArray(value)) {
+    return false;
   }
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  return value.every(
+    (item) =>
+      !!item &&
+      typeof item === "object" &&
+      typeof (item as StoredOrganizer).username === "string" &&
+      typeof (item as StoredOrganizer).passwordHash === "string",
+  );
 }
 
-function fromBase64Url(value: string): string {
-  const padded = value.replace(/-/g, "+").replace(/_/g, "/");
-  const pad = padded.length % 4 === 0 ? "" : "=".repeat(4 - (padded.length % 4));
-  const binary = atob(padded + pad);
-  const out = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) {
-    out[i] = binary.charCodeAt(i);
-  }
-  return new TextDecoder().decode(out);
-}
-
-function decodeCookiePayload(raw: string): string {
-  try {
-    return fromBase64Url(raw);
-  } catch {
-    try {
-      return decodeURIComponent(raw);
-    } catch {
-      return raw;
-    }
-  }
-}
-
-export function parseOrganizersCookie(raw: string | undefined): StoredOrganizer[] {
-  if (!raw) {
+/**
+ * Verify HMAC seal and return organizers. Unsigned or forged cookies are ignored.
+ */
+export async function unsealOrganizersCookie(
+  raw: string | undefined,
+): Promise<StoredOrganizer[]> {
+  const parsed = await unsealJson<unknown>(raw);
+  if (!isOrganizerList(parsed)) {
     return [];
   }
-  try {
-    const decoded = decodeCookiePayload(raw);
-    const parsed = JSON.parse(decoded) as unknown;
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed.filter(
-      (item): item is StoredOrganizer =>
-        !!item &&
-        typeof item === "object" &&
-        typeof (item as StoredOrganizer).username === "string" &&
-        typeof (item as StoredOrganizer).passwordHash === "string",
-    );
-  } catch {
-    return [];
-  }
+  return parsed;
 }
 
-export function serializeOrganizersCookie(users: StoredOrganizer[]): string {
-  return toBase64Url(JSON.stringify(users));
+export async function sealOrganizersCookie(
+  users: StoredOrganizer[],
+): Promise<string> {
+  return sealJson(users);
 }
 
 export function organizersCookieOptions() {
   return sessionCookieOptions();
 }
 
-export function hydrateOrganizersFromCookie(raw: string | undefined): void {
+export async function hydrateOrganizersFromCookie(
+  raw: string | undefined,
+): Promise<void> {
   const store = memoryStore();
-  for (const user of parseOrganizersCookie(raw)) {
+  for (const user of await unsealOrganizersCookie(raw)) {
     const key = user.username.toLowerCase();
     if (!store.has(key)) {
       store.set(key, user.passwordHash);
@@ -130,7 +107,7 @@ export async function registerOrganizer(input: {
   confirmPassword: string;
   cookieRaw?: string;
 }): Promise<RegisterResult> {
-  hydrateOrganizersFromCookie(input.cookieRaw);
+  await hydrateOrganizersFromCookie(input.cookieRaw);
 
   const username = input.username.trim();
   if (!USERNAME_RE.test(username)) {
@@ -161,7 +138,7 @@ export async function verifyOrganizerCredentials(
   password: string,
   cookieRaw?: string,
 ): Promise<boolean> {
-  hydrateOrganizersFromCookie(cookieRaw);
+  await hydrateOrganizersFromCookie(cookieRaw);
   const hash = memoryStore().get(username.trim().toLowerCase());
   if (!hash) {
     return false;

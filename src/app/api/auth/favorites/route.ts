@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { assertSameOrigin } from "@/lib/auth/request-guards";
 import {
   FAVORITES_COOKIE,
   getSession,
+  normalizeFavoriteIds,
   parseFavoriteIds,
   sessionCookieOptions,
 } from "@/lib/auth/session";
@@ -14,6 +16,10 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  if (!assertSameOrigin(request)) {
+    return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -26,10 +32,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
 
-  const incoming = Array.isArray(body.favorites)
-    ? body.favorites.filter((id): id is string => typeof id === "string")
-    : [];
-  const unique = [...new Set(incoming)];
+  const unique = normalizeFavoriteIds(body.favorites);
 
   const response = NextResponse.json({ favorites: unique });
   response.cookies.set(

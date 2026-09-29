@@ -7,6 +7,7 @@ import {
   createEmptyTournament,
   type TournamentFormat,
 } from "@/lib/tournament";
+import { useAuth } from "@/lib/auth/auth-provider";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
 import { formatLabel } from "@/i18n";
 import { useLocale } from "@/i18n/locale-provider";
@@ -31,6 +32,7 @@ const formats: TournamentFormat[] = [
 export function OrganizeCreatePage() {
   const router = useRouter();
   const { save, tournaments, ready } = useTournamentStore();
+  const { username } = useAuth();
   const { t } = useLocale();
   const formId = useId();
   const [name, setName] = useState("");
@@ -60,6 +62,7 @@ export function OrganizeCreatePage() {
       format,
       groupCount: Number(groupCount) || 2,
       advancePerGroup: 2,
+      ownerUsername: username ?? undefined,
     });
     save(tournament);
     router.push(`/organize/${tournament.id}`);

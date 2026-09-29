@@ -68,4 +68,4 @@ export function xShareUrl(url: string, text: string): string {
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://turnyfly.vercel.app";
+  "https://scorelive-app.vercel.app";
