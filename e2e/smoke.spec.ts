@@ -29,6 +29,24 @@ test.describe("Turnyfly smoke", () => {
     await expect(page.getByText("Отбор А")).toBeVisible();
   });
 
+  test("public tournament matches tab switches content", async ({ page }) => {
+    await page.goto("/tournaments/demo-volleyball");
+    await expect(
+      page.getByRole("heading", { name: "Пролетна купа София" }),
+    ).toBeVisible();
+    await expect(page.getByText("Група A")).toBeVisible();
+    const matchesTab = page.getByRole("tab", { name: "Мачове" });
+    await expect(matchesTab).toBeVisible();
+    await matchesTab.click();
+    await expect(matchesTab).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("heading", { name: "Мачове", exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: "Списък с мачове" }),
+    ).toBeVisible();
+  });
+
   test("score entry announces via live region", async ({ page }) => {
     await page.goto("/");
     await expect(

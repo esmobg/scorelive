@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { computeStandings } from "@/lib/tournament";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
@@ -16,6 +16,7 @@ export function PublicTournamentPage() {
   const params = useParams<{ id: string }>();
   const { getById, ready } = useTournamentStore();
   const tournament = getById(params.id);
+  const [tab, setTab] = useState<string | null>(null);
 
   const groupStandings = useMemo(() => {
     if (!tournament) return [];
@@ -70,6 +71,12 @@ export function PublicTournamentPage() {
   const hasStandings =
     groupStandings.length > 0 || overallGroupStandings !== null;
   const hasBracket = tournament.matches.some((m) => m.stage === "knockout");
+  const defaultTab = hasStandings
+    ? "standings"
+    : hasBracket
+      ? "bracket"
+      : "matches";
+  const activeTab = tab ?? defaultTab;
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-8 px-4 py-10 sm:px-6">
@@ -95,9 +102,12 @@ export function PublicTournamentPage() {
       </header>
 
       <Tabs
-        defaultValue={
-          hasStandings ? "standings" : hasBracket ? "bracket" : "matches"
-        }
+        value={activeTab}
+        onValueChange={(value) => {
+          if (typeof value === "string") {
+            setTab(value);
+          }
+        }}
       >
         <TabsList aria-label="Изгледи на турнира">
           {hasStandings ? (
