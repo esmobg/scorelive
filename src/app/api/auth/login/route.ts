@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ORGANIZERS_COOKIE } from "@/lib/auth/organizers";
 import {
   createSessionToken,
   FAVORITES_COOKIE,
@@ -6,7 +7,7 @@ import {
   parseFavoriteIds,
   SESSION_COOKIE,
   sessionCookieOptions,
-  verifyAdminCredentials,
+  verifyLoginCredentials,
 } from "@/lib/auth/session";
 
 export async function POST(request: Request) {
@@ -24,7 +25,14 @@ export async function POST(request: Request) {
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
 
-  const ok = await verifyAdminCredentials(username, password);
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const organizersRaw = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${ORGANIZERS_COOKIE}=`))
+    ?.slice(ORGANIZERS_COOKIE.length + 1);
+
+  const ok = await verifyLoginCredentials(username, password, organizersRaw);
   if (!ok) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
@@ -36,7 +44,6 @@ export async function POST(request: Request) {
   const clientFavorites = Array.isArray(body.favorites)
     ? body.favorites.filter((id): id is string => typeof id === "string")
     : [];
-  const cookieHeader = request.headers.get("cookie") ?? "";
   const existing = parseFavoriteIds(
     cookieHeader
       .split(";")

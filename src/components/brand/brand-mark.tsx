@@ -39,7 +39,7 @@ export function BrandMark({
       >
         <rect width="64" height="64" rx="14" fill="var(--tf-accent-deep)" />
         <path
-          d="M14 20h36v6.5H36.2V44h-8.4V26.5H14V20z"
+          d="M40.8 22.2c0-4.2-3.6-7-9.4-7-6.8 0-11.2 3.5-11.8 8.8h6.8c.4-2.1 2.3-3.4 5-3.4 2.5 0 4.1 1.1 4.1 2.9 0 1.7-1.1 2.6-4.9 3.8-6.4 2-11.6 4.6-11.6 11 0 4.9 4 8.6 10.6 8.6 7.1 0 11.9-3.7 12.7-9.3h-6.9c-.5 2.4-2.7 3.9-5.8 3.9-2.8 0-4.7-1.3-4.7-3.3 0-2 1.5-3 5.9-4.4 6.1-2 11.1-4.7 11.1-11.4z"
           fill="var(--tf-foam)"
         />
         <path
@@ -55,7 +55,7 @@ export function BrandMark({
             wordSizes[size],
           )}
         >
-          Turnyfly
+          ScoreLive
         </span>
       ) : null}
     </span>

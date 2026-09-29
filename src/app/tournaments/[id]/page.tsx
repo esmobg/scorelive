@@ -10,21 +10,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const title = `Турнир ${id}`;
   const description =
-    "Следете класиране, схема и мачове на живо в Turnyfly.";
+    "Следете класиране, схема и мачове на живо в ScoreLive.";
   const url = `${SITE_URL}/tournaments/${id}`;
   return {
     title,
     description,
     openGraph: {
-      title: `${title} · Turnyfly`,
+      title: `${title} · ScoreLive`,
       description,
       url,
       type: "website",
-      siteName: "Turnyfly",
+      siteName: "ScoreLive",
     },
     twitter: {
       card: "summary",
-      title: `${title} · Turnyfly`,
+      title: `${title} · ScoreLive`,
       description,
     },
   };

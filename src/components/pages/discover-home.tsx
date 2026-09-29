@@ -30,18 +30,18 @@ export function DiscoverHome() {
   return (
     <div className="space-y-16 pb-16">
       <section
-        className="hero-panel relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24"
+        className="hero-panel relative overflow-hidden px-4 py-10 sm:px-6 sm:py-24"
         aria-labelledby="hero-heading"
       >
         <div className="hero-atmosphere" aria-hidden="true" />
         <div className="hero-grid" aria-hidden="true" />
-        <div className="relative mx-auto flex max-w-6xl flex-col gap-6">
+        <div className="relative mx-auto flex max-w-6xl flex-col gap-5 sm:gap-6">
           <div className="motion-safe:animate-[mark-rise_0.9s_ease_both]">
             <BrandMark markAlt={t("brand.markAlt")} size="lg" />
           </div>
           <h1
             id="hero-heading"
-            className="max-w-xl text-2xl font-semibold leading-snug text-[var(--tf-ink)] sm:text-3xl motion-safe:animate-fade-up motion-safe:[animation-delay:80ms]"
+            className="max-w-xl text-xl font-semibold leading-snug text-[var(--tf-ink)] sm:text-3xl motion-safe:animate-fade-up motion-safe:[animation-delay:80ms]"
           >
             {t("home.heroTitle")}
           </h1>

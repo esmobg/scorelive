@@ -37,7 +37,7 @@ export function StandingsTable({ title, standings, teams }: StandingsTableProps)
       <h3 id={`standings-${title}`} className="section-title">
         {title}
       </h3>
-      <div className="overflow-x-auto rounded-lg border border-[var(--tf-line)] bg-[var(--tf-foam)]">
+      <div className="table-scroll rounded-lg border border-[var(--tf-line)] bg-[var(--tf-foam)]">
         <Table>
           <TableHeader>
             <TableRow>

@@ -3,12 +3,12 @@ import { expect, test, type Page } from "@playwright/test";
 async function loginAsAdmin(page: Page) {
   await page.goto("/login");
   await page.getByLabel("Потребителско име").fill("admin");
-  await page.getByLabel("Парола").fill("turnyfly-demo");
+  await page.getByLabel("Парола", { exact: true }).fill("turnyfly-demo");
   await page.getByRole("button", { name: "Вход" }).click();
   await expect(page).toHaveURL(/\/organize/);
 }
 
-test.describe("Turnyfly smoke", () => {
+test.describe("ScoreLive smoke", () => {
   test("skip link moves focus to main content", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("networkidle");
@@ -44,6 +44,38 @@ test.describe("Turnyfly smoke", () => {
     await expect(
       page.getByRole("heading", { name: "Вход за организатор" }),
     ).toBeVisible();
+  });
+
+  test("organizer can register and reach organize", async ({ page }) => {
+    const suffix = Date.now().toString(36);
+    const username = `org_${suffix}`;
+    await page.goto("/register");
+    await expect(
+      page.getByRole("heading", { name: "Регистрация за организатор" }),
+    ).toBeVisible();
+    await page.getByLabel("Потребителско име").fill(username);
+    await page.getByLabel("Парола", { exact: true }).fill("securepass1");
+    await page.getByLabel("Потвърдете паролата").fill("securepass1");
+    await page.getByRole("button", { name: "Регистрация" }).click();
+    await expect(page).toHaveURL(/\/organize/);
+    await expect(
+      page.getByRole("heading", { name: "Организирай турнир" }),
+    ).toBeVisible();
+  });
+
+  test("mobile nav opens drawer without page overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await expect(page.getByText("ScoreLive").first()).toBeVisible();
+    const openMenu = page.getByRole("button", { name: "Отвори меню" });
+    await expect(openMenu).toBeVisible();
+    await openMenu.click();
+    await expect(page.getByRole("link", { name: "Любими" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Регистрация" })).toBeVisible();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    expect(overflow).toBe(false);
   });
 
   test("keyboard create flow reaches team management", async ({ page }) => {
@@ -99,7 +131,7 @@ test.describe("Turnyfly smoke", () => {
 
   test("about and faq content pages render", async ({ page }) => {
     await page.goto("/about");
-    await expect(page.getByRole("heading", { name: "За Turnyfly" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "За ScoreLive" })).toBeVisible();
     await page.goto("/faq");
     await expect(
       page.getByRole("heading", { name: "Често задавани въпроси" }),

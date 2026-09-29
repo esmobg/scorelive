@@ -1,6 +1,6 @@
-# Accessibility statement — Turnyfly
+# Accessibility statement — ScoreLive
 
-Turnyfly aims for **WCAG 2.2 Level AAA** for the MVP surfaces (discover, organize, public tournament).
+ScoreLive aims for **WCAG 2.2 Level AAA** for the MVP surfaces (discover, organize, public tournament).
 
 ## What we ship
 

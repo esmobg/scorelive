@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Създайте турнир, добавете отбори, въведете резултати и споделете класирането.",
   openGraph: {
-    title: "Как работи Turnyfly",
+    title: "Как работи ScoreLive",
     description:
       "От създаване до споделяне — кратък поток за организатори и фенове.",
   },

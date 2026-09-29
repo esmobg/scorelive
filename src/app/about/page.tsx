@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "За нас",
   description:
-    "Turnyfly е отворена платформа за турнири — клубове, училища и общности.",
+    "ScoreLive е отворена платформа за турнири — клубове, училища и общности.",
   openGraph: {
-    title: "За Turnyfly",
+    title: "За ScoreLive",
     description:
       "Отворена платформа за турнири с групи, елиминации и първенства.",
   },

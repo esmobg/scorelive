@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import { verifyOrganizerCredentials } from "@/lib/auth/organizers";
 import {
   SESSION_COOKIE,
   verifySessionToken,
@@ -33,6 +34,18 @@ export async function verifyAdminCredentials(
     return false;
   }
   return bcrypt.compare(password, DEMO_PASSWORD_HASH);
+}
+
+/** Demo admin or a registered organizer (cookie-backed registry). */
+export async function verifyLoginCredentials(
+  username: string,
+  password: string,
+  organizersCookie?: string,
+): Promise<boolean> {
+  if (await verifyAdminCredentials(username, password)) {
+    return true;
+  }
+  return verifyOrganizerCredentials(username, password, organizersCookie);
 }
 
 export async function getSession(): Promise<SessionPayload | null> {

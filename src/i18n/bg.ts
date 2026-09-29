@@ -1,11 +1,11 @@
 export const bg = {
-  "meta.title": "Turnyfly — турнирната платформа",
+  "meta.title": "ScoreLive — турнирната платформа",
   "meta.description":
     "Отворена платформа за турнири: организирайте групи, елиминации и първенства, въвеждайте резултати и следете класирането.",
 
-  "brand.name": "Turnyfly",
-  "brand.tagline": "Turnyfly — отворена платформа за турнири. MIT лиценз.",
-  "brand.markAlt": "Лого на Turnyfly",
+  "brand.name": "ScoreLive",
+  "brand.tagline": "ScoreLive — отворена платформа за турнири. MIT лиценз.",
+  "brand.markAlt": "Лого на ScoreLive",
 
   "nav.home": "Начало",
   "nav.organize": "Организирай",
@@ -14,12 +14,15 @@ export const bg = {
   "nav.howItWorks": "Как работи",
   "nav.faq": "ЧЗВ",
   "nav.login": "Вход",
+  "nav.register": "Регистрация",
   "nav.logout": "Изход",
   "nav.main": "Основна навигация",
   "nav.footer": "Допълнителна навигация",
   "nav.social": "Социални мрежи",
   "nav.accessibility": "Достъпност",
   "nav.skip": "Към основното съдържание",
+  "nav.menuOpen": "Отвори меню",
+  "nav.menuClose": "Затвори меню",
 
   "locale.label": "Език",
   "locale.bg": "Български",
@@ -54,7 +57,7 @@ export const bg = {
   "home.ctaSectionLead":
     "Влезте като администратор, за да създавате турнири, или разгледайте публичните демо данни.",
   "home.ctaSectionOrganize": "Към организиране",
-  "home.ctaSectionAbout": "Повече за Turnyfly",
+  "home.ctaSectionAbout": "Повече за ScoreLive",
 
   "card.teamsPlayed": "{teams} отбора · {played}/{total} изиграни мача",
   "card.follow": "Следвай турнира",
@@ -158,15 +161,33 @@ export const bg = {
   "login.error": "Невалидно потребителско име или парола.",
   "login.loading": "Проверка…",
   "login.success": "Успешен вход.",
+  "login.noAccount": "Нямате акаунт?",
+
+  "register.title": "Регистрация за организатор",
+  "register.lead":
+    "Създайте акаунт, за да организирате турнири и да въвеждате резултати.",
+  "register.username": "Потребителско име",
+  "register.usernameHelp": "3–32 символа: латински букви, цифри или _",
+  "register.password": "Парола",
+  "register.passwordHelp": "Минимум 8 символа.",
+  "register.confirmPassword": "Потвърдете паролата",
+  "register.submit": "Регистрация",
+  "register.loading": "Създаване…",
+  "register.haveAccount": "Вече имате акаунт?",
+  "register.error": "Регистрацията неуспешна. Опитайте отново.",
+  "register.errorUsername": "Невалидно потребителско име.",
+  "register.errorPassword": "Паролата трябва да е поне 8 символа.",
+  "register.errorMismatch": "Паролите не съвпадат.",
+  "register.errorTaken": "Това потребителско име вече е заето.",
 
   "auth.requiredTitle": "Изисква се вход",
   "auth.requiredBody":
-    "Само администратори могат да организират турнири и да въвеждат резултати.",
+    "Само организатори могат да организират турнири и да въвеждат резултати.",
   "auth.goLogin": "Към вход",
 
-  "about.title": "За Turnyfly",
+  "about.title": "За ScoreLive",
   "about.lead":
-    "Turnyfly е отворена платформа за турнири — създадена за клубове, училища и общности, които искат ясно класиране без сложни акаунти.",
+    "ScoreLive е отворена платформа за турнири — създадена за клубове, училища и общности, които искат ясно класиране без сложни акаунти.",
   "about.body1":
     "Организаторите избират формат, добавят отбори и обновяват резултати. Състезатели и фенове следят публичните страници на живо.",
   "about.body2":
@@ -256,7 +277,7 @@ export const bg = {
 
   "a11y.title": "Достъпност",
   "a11y.intro":
-    "Turnyfly е проектиран с цел WCAG 2.2 ниво AAA за основните екрани. Пълният документ е в хранилището като ACCESSIBILITY.md.",
+    "ScoreLive е проектиран с цел WCAG 2.2 ниво AAA за основните екрани. Пълният документ е в хранилището като ACCESSIBILITY.md.",
   "a11y.item.skip": "Връзка за пропускане към основното съдържание",
   "a11y.item.landmarks": "Семантични ориентири и видими фокус стилове",
   "a11y.item.contrast": "Контраст на текста ≥ 7:1 спрямо фоновите токени",

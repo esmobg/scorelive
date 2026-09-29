@@ -1,4 +1,4 @@
-/* Turnyfly AAA tokens — deep forest ink on misted sage; contrast ≥ 7:1 for body text */
+/* ScoreLive AAA tokens — deep forest ink on misted sage; contrast ≥ 7:1 for body text */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -131,6 +131,8 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    overflow-x: clip;
+    max-width: 100%;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -157,6 +159,8 @@
       linear-gradient(180deg, #e7f5ed 0%, var(--tf-mist) 42%, #c6dfd2 100%);
     background-attachment: fixed;
     min-height: 100%;
+    overflow-x: clip;
+    max-width: 100%;
   }
 
   :focus-visible {
@@ -202,9 +206,22 @@
 }
 
 .hero-panel {
-  min-height: min(78vh, 42rem);
+  min-height: min(68vh, 36rem);
   display: flex;
   align-items: flex-end;
+}
+
+@media (min-width: 640px) {
+  .hero-panel {
+    min-height: min(78vh, 42rem);
+  }
+}
+
+.table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .hero-atmosphere {

@@ -1,13 +1,13 @@
 import type { Messages } from "./bg";
 
 export const en = {
-  "meta.title": "Turnyfly — tournament platform",
+  "meta.title": "ScoreLive — tournament platform",
   "meta.description":
     "Open tournament platform: organize groups, knockouts, and leagues, enter scores, and follow standings.",
 
-  "brand.name": "Turnyfly",
-  "brand.tagline": "Turnyfly — open tournament platform. MIT license.",
-  "brand.markAlt": "Turnyfly logo",
+  "brand.name": "ScoreLive",
+  "brand.tagline": "ScoreLive — open tournament platform. MIT license.",
+  "brand.markAlt": "ScoreLive logo",
 
   "nav.home": "Home",
   "nav.organize": "Organize",
@@ -16,12 +16,15 @@ export const en = {
   "nav.howItWorks": "How it works",
   "nav.faq": "FAQ",
   "nav.login": "Log in",
+  "nav.register": "Register",
   "nav.logout": "Log out",
   "nav.main": "Main navigation",
   "nav.footer": "Secondary navigation",
   "nav.social": "Social networks",
   "nav.accessibility": "Accessibility",
   "nav.skip": "Skip to main content",
+  "nav.menuOpen": "Open menu",
+  "nav.menuClose": "Close menu",
 
   "locale.label": "Language",
   "locale.bg": "Български",
@@ -56,7 +59,7 @@ export const en = {
   "home.ctaSectionLead":
     "Log in as admin to create tournaments, or browse the public demo data.",
   "home.ctaSectionOrganize": "Go to organize",
-  "home.ctaSectionAbout": "More about Turnyfly",
+  "home.ctaSectionAbout": "More about ScoreLive",
 
   "card.teamsPlayed": "{teams} teams · {played}/{total} matches played",
   "card.follow": "Follow tournament",
@@ -153,22 +156,40 @@ export const en = {
 
   "login.title": "Organizer log in",
   "login.lead":
-    "Admin log in unlocks tournament creation and score entry.",
+    "Organizer log in unlocks tournament creation and score entry.",
   "login.username": "Username",
   "login.password": "Password",
   "login.submit": "Log in",
   "login.error": "Invalid username or password.",
   "login.loading": "Checking…",
   "login.success": "Logged in successfully.",
+  "login.noAccount": "No account yet?",
+
+  "register.title": "Organizer registration",
+  "register.lead":
+    "Create an account to organize tournaments and enter scores.",
+  "register.username": "Username",
+  "register.usernameHelp": "3–32 characters: letters, numbers, or _",
+  "register.password": "Password",
+  "register.passwordHelp": "At least 8 characters.",
+  "register.confirmPassword": "Confirm password",
+  "register.submit": "Register",
+  "register.loading": "Creating…",
+  "register.haveAccount": "Already have an account?",
+  "register.error": "Registration failed. Please try again.",
+  "register.errorUsername": "Invalid username.",
+  "register.errorPassword": "Password must be at least 8 characters.",
+  "register.errorMismatch": "Passwords do not match.",
+  "register.errorTaken": "That username is already taken.",
 
   "auth.requiredTitle": "Log in required",
   "auth.requiredBody":
-    "Only administrators can organize tournaments and enter scores.",
+    "Only organizers can organize tournaments and enter scores.",
   "auth.goLogin": "Go to log in",
 
-  "about.title": "About Turnyfly",
+  "about.title": "About ScoreLive",
   "about.lead":
-    "Turnyfly is an open tournament platform — built for clubs, schools, and communities that want clear standings without heavy accounts.",
+    "ScoreLive is an open tournament platform — built for clubs, schools, and communities that want clear standings without heavy accounts.",
   "about.body1":
     "Organizers pick a format, add teams, and update scores. Players and fans follow public pages live.",
   "about.body2":
@@ -258,7 +279,7 @@ export const en = {
 
   "a11y.title": "Accessibility",
   "a11y.intro":
-    "Turnyfly targets WCAG 2.2 Level AAA on the core screens. The full statement lives in the repository as ACCESSIBILITY.md.",
+    "ScoreLive targets WCAG 2.2 Level AAA on the core screens. The full statement lives in the repository as ACCESSIBILITY.md.",
   "a11y.item.skip": "Skip link to main content",
   "a11y.item.landmarks": "Semantic landmarks and visible focus styles",
   "a11y.item.contrast": "Text contrast ≥ 7:1 against background tokens",

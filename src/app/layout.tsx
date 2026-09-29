@@ -24,8 +24,8 @@ const body = Manrope({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Turnyfly — турнирната платформа",
-    template: "%s · Turnyfly",
+    default: "ScoreLive — турнирната платформа",
+    template: "%s · ScoreLive",
   },
   description:
     "Отворена платформа за турнири: организирайте групи, елиминации и първенства, въвеждайте резултати и следете класирането.",
@@ -33,15 +33,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "bg_BG",
     alternateLocale: ["en_US"],
-    siteName: "Turnyfly",
-    title: "Turnyfly — турнирната платформа",
+    siteName: "ScoreLive",
+    title: "ScoreLive — турнирната платформа",
     description:
       "Отворена платформа за турнири: групи, елиминации, първенства и живо класиране.",
     url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Turnyfly — турнирната платформа",
+    title: "ScoreLive — турнирната платформа",
     description:
       "Отворена платформа за турнири: групи, елиминации, първенства и живо класиране.",
   },
