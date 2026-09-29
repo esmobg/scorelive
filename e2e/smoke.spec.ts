@@ -50,13 +50,14 @@ test.describe("ScoreLive smoke", () => {
     const suffix = Date.now().toString(36);
     const username = `org_${suffix}`;
     await page.goto("/register");
+    const main = page.locator("#main-content");
     await expect(
-      page.getByRole("heading", { name: "Регистрация за организатор" }),
+      main.getByRole("heading", { name: "Регистрация за организатор" }),
     ).toBeVisible();
-    await page.getByLabel("Потребителско име").fill(username);
-    await page.getByLabel("Парола", { exact: true }).fill("securepass1");
-    await page.getByLabel("Потвърдете паролата").fill("securepass1");
-    await page.getByRole("button", { name: "Регистрация" }).click();
+    await main.getByRole("textbox", { name: "Потребителско име" }).fill(username);
+    await main.locator('input[name="password"]').fill("securepass1");
+    await main.locator('input[name="confirmPassword"]').fill("securepass1");
+    await main.getByRole("button", { name: "Регистрация" }).click();
     await expect(page).toHaveURL(/\/organize/);
     await expect(
       page.getByRole("heading", { name: "Организирай турнир" }),
