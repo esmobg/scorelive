@@ -1,8 +1,14 @@
 import { generateGroupStage } from "./groups";
 import { applyKnockoutScore, generateKnockoutBracket } from "./knockout";
 import { computeStandings, topTeamIds } from "./standings";
-import type { CreateTournamentInput, Team, Tournament } from "./types";
+import type {
+  AddTeamInput,
+  CreateTournamentInput,
+  Team,
+  Tournament,
+} from "./types";
 import { createId } from "./id";
+import { normalizeCountryCode } from "@/lib/countries";
 
 export function createEmptyTournament(input: CreateTournamentInput): Tournament {
   const now = new Date().toISOString();
@@ -23,12 +29,24 @@ export function createEmptyTournament(input: CreateTournamentInput): Tournament 
   };
 }
 
-export function addTeam(tournament: Tournament, name: string): Tournament {
-  const trimmed = name.trim();
+export function addTeam(
+  tournament: Tournament,
+  input: string | AddTeamInput,
+): Tournament {
+  const payload: AddTeamInput =
+    typeof input === "string"
+      ? { name: input, countryCode: "BG" }
+      : input;
+  const trimmed = payload.name.trim();
   if (!trimmed) {
     return tournament;
   }
-  const team: Team = { id: createId("tm"), name: trimmed };
+  const team: Team = {
+    id: createId("tm"),
+    name: trimmed,
+    countryCode: normalizeCountryCode(payload.countryCode),
+    ...(payload.logoDataUrl ? { logoDataUrl: payload.logoDataUrl } : {}),
+  };
   return {
     ...tournament,
     teams: [...tournament.teams, team],

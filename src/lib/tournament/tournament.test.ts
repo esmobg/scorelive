@@ -13,7 +13,11 @@ import {
 } from "./index";
 
 function teams(...names: string[]): Team[] {
-  return names.map((name, i) => ({ id: `tm${i}`, name }));
+  return names.map((name, i) => ({
+    id: `tm${i}`,
+    name,
+    countryCode: "BG",
+  }));
 }
 
 describe("round-robin", () => {

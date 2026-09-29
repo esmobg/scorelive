@@ -1,5 +1,8 @@
 import type { Match, Team } from "./types";
 import { createId } from "./id";
+import { knockoutRoundLabel } from "./labels";
+
+export { knockoutRoundLabel } from "./labels";
 
 /** Next power of two ≥ n (minimum 2). */
 export function nextPowerOfTwo(n: number): number {
@@ -8,14 +11,6 @@ export function nextPowerOfTwo(n: number): number {
     p *= 2;
   }
   return p;
-}
-
-export function knockoutRoundLabel(teamsInRound: number): string {
-  if (teamsInRound <= 2) return "Финал";
-  if (teamsInRound <= 4) return "1/2-финал";
-  if (teamsInRound <= 8) return "1/4-финал";
-  if (teamsInRound <= 16) return "1/8-финал";
-  return `Рунд на ${teamsInRound}`;
 }
 
 /**

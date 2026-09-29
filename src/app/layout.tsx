@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Unbounded } from "next/font/google";
 import { SkipLink } from "@/components/a11y/skip-link";
 import { SiteFooter, SiteHeader } from "@/components/layout/site-shell";
+import { LocaleProvider } from "@/i18n/locale-provider";
 import { TournamentStoreProvider } from "@/lib/storage/use-tournament-store";
 import "./globals.css";
 
@@ -33,14 +34,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col font-[family-name:var(--font-body)]">
-        <TournamentStoreProvider>
-          <SkipLink />
-          <SiteHeader />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <SiteFooter />
-        </TournamentStoreProvider>
+        <LocaleProvider>
+          <TournamentStoreProvider>
+            <SkipLink />
+            <SiteHeader />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <SiteFooter />
+          </TournamentStoreProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

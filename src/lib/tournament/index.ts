@@ -1,4 +1,5 @@
 export type {
+  AddTeamInput,
   CreateTournamentInput,
   Group,
   Match,
@@ -23,6 +24,11 @@ export {
   knockoutRoundLabel,
   nextPowerOfTwo,
 } from "./knockout";
+export {
+  groupDisplayName,
+  knockoutRoundLabelFor,
+  localizeMatchLabel,
+} from "./labels";
 export { computeStandings, topTeamIds } from "./standings";
 export {
   addTeam,

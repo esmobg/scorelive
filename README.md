@@ -1,12 +1,13 @@
 # Turnyfly
 
-Open-source tournament platform for organizers, players, and fans. Create group stages and knockout brackets, enter scores, and follow live standings — sport-agnostic, Bulgarian UI, WCAG 2.2 AAA-minded.
+Open-source tournament platform for organizers, players, and fans. Create group stages and knockout brackets, enter scores, and follow live standings — sport-agnostic, bilingual (BG/EN), WCAG 2.2 AAA-minded.
 
 ## Stack
 
 - Next.js (App Router) + TypeScript
 - Tailwind CSS + shadcn/ui
-- Client persistence via `localStorage` + seeded demo tournaments (no auth, payments, or database in this MVP)
+- Client persistence via `localStorage` (v2) + seeded demo tournaments (no auth, payments, or database in this MVP)
+- Custom i18n dictionaries + React context (Bulgarian / English)
 
 ## Requirements
 
@@ -36,10 +37,11 @@ Open [http://127.0.0.1:43123](http://127.0.0.1:43123).
 ## Features in this slice
 
 - Discover home with demo tournaments
-- Organizer flow: create tournament, add teams, generate fixtures, enter scores
-- Public tournament page: standings, knockout bracket, match list
+- Organizer flow: create tournament, add teams with nationality flags + optional logos, generate fixtures, enter scores
+- Public tournament page: standings, knockout bracket, match list with TeamBadge (flag + logo/initials)
 - Formats: groups (round-robin), knockout (single elimination), groups → knockout
-- Accessibility shell: skip link, landmarks, focus styles, AAA contrast tokens, `aria-live` score updates, `prefers-reduced-motion`
+- Header locale toggle; `html[lang]` follows BG/EN
+- Accessibility shell: skip link, landmarks, focus styles, AAA contrast tokens, ≥44px targets, `aria-live` score/logo errors, `prefers-reduced-motion`
 
 ## Out of scope
 

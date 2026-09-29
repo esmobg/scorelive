@@ -3,10 +3,68 @@ import {
   createEmptyTournament,
   generateFixtures,
   setMatchScore,
+  type Team,
   type Tournament,
 } from "@/lib/tournament";
+import { normalizeCountryCode } from "@/lib/countries";
 
-const STORAGE_KEY = "turnyfly.tournaments.v1";
+const STORAGE_KEY_V1 = "turnyfly.tournaments.v1";
+const STORAGE_KEY_V2 = "turnyfly.tournaments.v2";
+
+type RawTeam = Partial<Team> & { id?: string; name?: string };
+
+function normalizeTeam(raw: RawTeam, index: number): Team | null {
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  const name = typeof raw.name === "string" ? raw.name.trim() : "";
+  if (!name) {
+    return null;
+  }
+  const id =
+    typeof raw.id === "string" && raw.id.trim()
+      ? raw.id
+      : `tm-migrated-${index}`;
+  const team: Team = {
+    id,
+    name,
+    countryCode: normalizeCountryCode(raw.countryCode),
+  };
+  if (typeof raw.logoDataUrl === "string" && raw.logoDataUrl.startsWith("data:")) {
+    team.logoDataUrl = raw.logoDataUrl;
+  }
+  return team;
+}
+
+function normalizeTournament(raw: unknown): Tournament | null {
+  if (!raw || typeof raw !== "object") {
+    return null;
+  }
+  const t = raw as Tournament & { teams?: RawTeam[] };
+  if (typeof t.id !== "string" || typeof t.name !== "string") {
+    return null;
+  }
+  const teams = Array.isArray(t.teams)
+    ? t.teams
+        .map((team, i) => normalizeTeam(team, i))
+        .filter((team): team is Team => Boolean(team))
+    : [];
+  return {
+    ...t,
+    teams,
+  };
+}
+
+function normalizeTournaments(raw: unknown): Tournament[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  return raw
+    .map((item) => normalizeTournament(item))
+    .filter((item): item is Tournament => Boolean(item));
+}
+
+type SeedTeam = { name: string; countryCode: string };
 
 function demoVolleyball(): Tournament {
   let t = createEmptyTournament({
@@ -20,22 +78,22 @@ function demoVolleyball(): Tournament {
   });
   t = { ...t, id: "demo-volleyball" };
 
-  for (const name of [
-    "Левски",
-    "ЦСКА",
-    "Марица",
-    "Берое",
-    "Славия",
-    "Локомотив",
-    "Хебър",
-    "Добруджа",
-  ]) {
-    t = addTeam(t, name);
+  const roster: SeedTeam[] = [
+    { name: "Левски", countryCode: "BG" },
+    { name: "ЦСКА", countryCode: "BG" },
+    { name: "Марица", countryCode: "BG" },
+    { name: "Берое", countryCode: "BG" },
+    { name: "Славия", countryCode: "BG" },
+    { name: "Локомотив", countryCode: "BG" },
+    { name: "Хебър", countryCode: "BG" },
+    { name: "Добруджа", countryCode: "RO" },
+  ];
+  for (const team of roster) {
+    t = addTeam(t, team);
   }
 
   t = generateFixtures(t);
 
-  // Seed a few group scores so standings look alive
   const groupMatches = t.matches.filter((m) => m.stage === "group");
   if (groupMatches[0]) {
     t = setMatchScore(t, groupMatches[0].id, 3, 1);
@@ -60,15 +118,16 @@ function demoChessKnockout(): Tournament {
   });
   t = { ...t, id: "demo-chess" };
 
-  for (const name of [
-    "Иванов",
-    "Петрова",
-    "Георгиев",
-    "Николова",
-    "Димитров",
-    "Стоянова",
-  ]) {
-    t = addTeam(t, name);
+  const roster: SeedTeam[] = [
+    { name: "Иванов", countryCode: "BG" },
+    { name: "Петрова", countryCode: "BG" },
+    { name: "Георгиев", countryCode: "GR" },
+    { name: "Николова", countryCode: "BG" },
+    { name: "Димитров", countryCode: "RS" },
+    { name: "Стоянова", countryCode: "BG" },
+  ];
+  for (const team of roster) {
+    t = addTeam(t, team);
   }
 
   t = generateFixtures(t);
@@ -97,13 +156,14 @@ function demoFootballGroups(): Tournament {
   });
   t = { ...t, id: "demo-football" };
 
-  for (const name of [
-    "Черно море юноши",
-    "Спартак аматьори",
-    "Калиакра",
-    "Аксаково",
-  ]) {
-    t = addTeam(t, name);
+  const roster: SeedTeam[] = [
+    { name: "Черно море юноши", countryCode: "BG" },
+    { name: "Спартак аматьори", countryCode: "BG" },
+    { name: "Калиакра", countryCode: "BG" },
+    { name: "Аксаково", countryCode: "TR" },
+  ];
+  for (const team of roster) {
+    t = addTeam(t, team);
   }
 
   t = generateFixtures(t);
@@ -114,25 +174,37 @@ export function getSeedTournaments(): Tournament[] {
   return [demoVolleyball(), demoChessKnockout(), demoFootballGroups()];
 }
 
+function persistV2(tournaments: Tournament[]): void {
+  window.localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(tournaments));
+  window.localStorage.removeItem(STORAGE_KEY_V1);
+}
+
 export function loadTournaments(): Tournament[] {
   if (typeof window === "undefined") {
     return getSeedTournaments();
   }
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const seed = getSeedTournaments();
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-      return seed;
+    const rawV2 = window.localStorage.getItem(STORAGE_KEY_V2);
+    if (rawV2) {
+      const parsed = normalizeTournaments(JSON.parse(rawV2));
+      if (parsed.length > 0) {
+        return parsed;
+      }
     }
-    const parsed = JSON.parse(raw) as Tournament[];
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      const seed = getSeedTournaments();
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
-      return seed;
+
+    const rawV1 = window.localStorage.getItem(STORAGE_KEY_V1);
+    if (rawV1) {
+      const migrated = normalizeTournaments(JSON.parse(rawV1));
+      if (migrated.length > 0) {
+        persistV2(migrated);
+        return migrated;
+      }
     }
-    return parsed;
+
+    const seed = getSeedTournaments();
+    persistV2(seed);
+    return seed;
   } catch {
     return getSeedTournaments();
   }
@@ -142,7 +214,7 @@ export function saveTournaments(tournaments: Tournament[]): void {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tournaments));
+  persistV2(tournaments);
 }
 
 export function getTournament(id: string): Tournament | undefined {
@@ -171,3 +243,8 @@ export function resetToSeed(): Tournament[] {
   saveTournaments(seed);
   return seed;
 }
+
+export const STORAGE_KEYS = {
+  v1: STORAGE_KEY_V1,
+  v2: STORAGE_KEY_V2,
+} as const;

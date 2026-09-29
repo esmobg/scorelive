@@ -7,6 +7,16 @@ export type MatchSlot = "home" | "away";
 export interface Team {
   id: string;
   name: string;
+  /** ISO 3166-1 alpha-2 country code, e.g. "BG". */
+  countryCode: string;
+  /** Optional compressed image data URL stored in localStorage. */
+  logoDataUrl?: string;
+}
+
+export interface AddTeamInput {
+  name: string;
+  countryCode: string;
+  logoDataUrl?: string;
 }
 
 export interface Group {

@@ -1,34 +1,29 @@
-import type { Match, Team } from "@/lib/tournament";
+"use client";
+
+import type { Group, Match, Team } from "@/lib/tournament";
+import { localizeMatchLabel } from "@/lib/tournament";
 import { Badge } from "@/components/ui/badge";
+import { TeamBadge, findTeam } from "@/components/tournament/team-badge";
+import { useLocale } from "@/i18n/locale-provider";
 
 interface MatchListProps {
   matches: Match[];
   teams: Team[];
+  groups?: Group[];
   emptyMessage?: string;
-}
-
-function teamName(teams: Team[], id: string | null): string {
-  if (!id) return "Чака се";
-  return teams.find((t) => t.id === id)?.name ?? "—";
-}
-
-function statusLabel(match: Match): { text: string; done: boolean } {
-  if (match.homeScore !== null && match.awayScore !== null) {
-    return { text: "Изигран", done: true };
-  }
-  if (!match.homeTeamId || !match.awayTeamId) {
-    return { text: "Чака се", done: false };
-  }
-  return { text: "Предстои", done: false };
 }
 
 export function MatchList({
   matches,
   teams,
-  emptyMessage = "Няма мачове.",
+  groups = [],
+  emptyMessage,
 }: MatchListProps) {
+  const { t } = useLocale();
+  const empty = emptyMessage ?? t("matches.empty");
+
   if (matches.length === 0) {
-    return <p className="text-[var(--tf-ink-muted)]">{emptyMessage}</p>;
+    return <p className="text-[var(--tf-ink-muted)]">{empty}</p>;
   }
 
   const sorted = [...matches].sort((a, b) => {
@@ -38,28 +33,58 @@ export function MatchList({
     return a.round - b.round || a.label.localeCompare(b.label);
   });
 
+  const knockoutByRound = new Map<number, number>();
+  for (const match of matches.filter((m) => m.stage === "knockout")) {
+    knockoutByRound.set(
+      match.round,
+      (knockoutByRound.get(match.round) ?? 0) + 1,
+    );
+  }
+
   return (
-    <ul className="space-y-2" aria-label="Списък с мачове">
+    <ul className="space-y-2" aria-label={t("matches.listLabel")}>
       {sorted.map((match) => {
-        const status = statusLabel(match);
+        const status =
+          match.homeScore !== null && match.awayScore !== null
+            ? { text: t("matches.statusPlayed"), done: true }
+            : !match.homeTeamId || !match.awayTeamId
+              ? { text: t("matches.statusPending"), done: false }
+              : { text: t("matches.statusUpcoming"), done: false };
+
+        const home = findTeam(teams, match.homeTeamId);
+        const away = findTeam(teams, match.awayTeamId);
+        const teamsInRound =
+          match.stage === "knockout"
+            ? (knockoutByRound.get(match.round) ?? 0) * 2
+            : undefined;
+        const label = localizeMatchLabel(match, groups, t, teamsInRound);
+
         return (
           <li
             key={match.id}
-            className="flex flex-col gap-2 rounded-md border border-[var(--tf-line)] bg-[var(--tf-foam)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-md border border-[var(--tf-line)] bg-[var(--tf-foam)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
           >
-            <div className="min-w-0 space-y-1">
+            <div className="min-w-0 space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--tf-ink-muted)]">
-                {match.label}
+                {label}
               </p>
-              <p className="text-base font-medium text-[var(--tf-ink)]">
-                <span>{teamName(teams, match.homeTeamId)}</span>
-                <span className="mx-2 tabular-nums text-[var(--tf-accent-deep)]">
+              <div className="flex flex-wrap items-center gap-2 text-base text-[var(--tf-ink)]">
+                {home ? (
+                  <TeamBadge team={home} compact />
+                ) : (
+                  <span className="font-medium">{t("matches.waiting")}</span>
+                )}
+                <span className="mx-1 tabular-nums font-semibold text-[var(--tf-accent-deep)]">
                   {match.homeScore !== null && match.awayScore !== null
                     ? `${match.homeScore} : ${match.awayScore}`
                     : "– : –"}
                 </span>
-                <span>{teamName(teams, match.awayTeamId)}</span>
-              </p>
+                {away ? (
+                  <TeamBadge team={away} compact />
+                ) : (
+                  <span className="font-medium">{t("matches.waiting")}</span>
+                )}
+              </div>
             </div>
             <Badge
               variant={status.done ? "default" : "secondary"}

@@ -13,6 +13,23 @@ test.describe("Turnyfly smoke", () => {
     await expect(page.locator("#main-content")).toBeVisible();
   });
 
+  test("locale toggle switches English UI and html lang", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("html")).toHaveAttribute("lang", "bg");
+    await page.getByRole("button", { name: "English" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(
+      page.getByRole("heading", {
+        name: "Tournaments for organizers, players, and fans",
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Restore demo" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Български" }).click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "bg");
+  });
+
   test("keyboard create flow reaches team management", async ({ page }) => {
     await page.goto("/organize");
     await expect(page.getByLabel("Име на турнира")).toBeVisible();
@@ -27,6 +44,7 @@ test.describe("Turnyfly smoke", () => {
     await page.getByLabel("Нов отбор / участник").fill("Отбор А");
     await page.getByRole("button", { name: "Добави" }).click();
     await expect(page.getByText("Отбор А")).toBeVisible();
+    await expect(page.getByText("BG", { exact: true }).first()).toBeVisible();
   });
 
   test("public tournament matches tab switches content", async ({ page }) => {

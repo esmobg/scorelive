@@ -8,7 +8,8 @@ import {
   type TournamentFormat,
 } from "@/lib/tournament";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
-import { formatLabels } from "@/components/tournament/tournament-card";
+import { formatLabel } from "@/i18n";
+import { useLocale } from "@/i18n/locale-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ const formats: TournamentFormat[] = ["groups", "knockout", "groups_knockout"];
 export function OrganizeCreatePage() {
   const router = useRouter();
   const { save, tournaments, ready } = useTournamentStore();
+  const { t } = useLocale();
   const formId = useId();
   const [name, setName] = useState("");
   const [sport, setSport] = useState("");
@@ -37,11 +39,11 @@ export function OrganizeCreatePage() {
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!name.trim() || !sport.trim() || !startDate || !endDate) {
-      setError("Попълнете име, спорт и дати.");
+      setError(t("organize.errorRequired"));
       return;
     }
     if (endDate < startDate) {
-      setError("Крайната дата трябва да е след началната.");
+      setError(t("organize.errorDates"));
       return;
     }
     setError("");
@@ -62,12 +64,9 @@ export function OrganizeCreatePage() {
     <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-10 sm:px-6">
       <header className="space-y-2">
         <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[var(--tf-ink)] sm:text-4xl">
-          Организирай турнир
+          {t("organize.title")}
         </h1>
-        <p className="text-[var(--tf-ink-muted)]">
-          Универсален формат — групи, елиминации или комбинация. Спортът е
-          свободен текст.
-        </p>
+        <p className="text-[var(--tf-ink-muted)]">{t("organize.lead")}</p>
       </header>
 
       <form
@@ -76,7 +75,7 @@ export function OrganizeCreatePage() {
         noValidate
       >
         <div className="space-y-1.5">
-          <Label htmlFor={`${formId}-name`}>Име на турнира</Label>
+          <Label htmlFor={`${formId}-name`}>{t("organize.name")}</Label>
           <Input
             id={`${formId}-name`}
             value={name}
@@ -84,22 +83,24 @@ export function OrganizeCreatePage() {
             required
             aria-required="true"
             autoComplete="off"
+            className="min-h-11"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor={`${formId}-sport`}>Спорт / дисциплина</Label>
+          <Label htmlFor={`${formId}-sport`}>{t("organize.sport")}</Label>
           <Input
             id={`${formId}-sport`}
             value={sport}
             onChange={(e) => setSport(e.target.value)}
-            placeholder="напр. Волейбол, Шахмат, Футбол"
+            placeholder={t("organize.sportPlaceholder")}
             required
             aria-required="true"
+            className="min-h-11"
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor={`${formId}-start`}>Начална дата</Label>
+            <Label htmlFor={`${formId}-start`}>{t("organize.startDate")}</Label>
             <Input
               id={`${formId}-start`}
               type="date"
@@ -107,10 +108,11 @@ export function OrganizeCreatePage() {
               onChange={(e) => setStartDate(e.target.value)}
               required
               aria-required="true"
+              className="min-h-11"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor={`${formId}-end`}>Крайна дата</Label>
+            <Label htmlFor={`${formId}-end`}>{t("organize.endDate")}</Label>
             <Input
               id={`${formId}-end`}
               type="date"
@@ -118,11 +120,12 @@ export function OrganizeCreatePage() {
               onChange={(e) => setEndDate(e.target.value)}
               required
               aria-required="true"
+              className="min-h-11"
             />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor={`${formId}-format`}>Формат</Label>
+          <Label htmlFor={`${formId}-format`}>{t("organize.format")}</Label>
           <Select
             value={format}
             onValueChange={(value) => {
@@ -136,14 +139,14 @@ export function OrganizeCreatePage() {
             }}
           >
             <SelectTrigger id={`${formId}-format`} className="w-full min-h-11">
-              <SelectValue placeholder="Изберете формат">
-                {formatLabels[format]}
+              <SelectValue placeholder={t("organize.formatPlaceholder")}>
+                {formatLabel(format, t)}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {formats.map((f) => (
                 <SelectItem key={f} value={f}>
-                  {formatLabels[f]}
+                  {formatLabel(f, t)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -151,7 +154,7 @@ export function OrganizeCreatePage() {
         </div>
         {format !== "knockout" ? (
           <div className="space-y-1.5">
-            <Label htmlFor={`${formId}-groups`}>Брой групи</Label>
+            <Label htmlFor={`${formId}-groups`}>{t("organize.groupCount")}</Label>
             <Input
               id={`${formId}-groups`}
               type="number"
@@ -159,6 +162,7 @@ export function OrganizeCreatePage() {
               max={8}
               value={groupCount}
               onChange={(e) => setGroupCount(e.target.value)}
+              className="min-h-11"
             />
           </div>
         ) : null}
@@ -169,7 +173,9 @@ export function OrganizeCreatePage() {
           </p>
         ) : null}
 
-        <Button type="submit">Създай и добави отбори</Button>
+        <Button type="submit" className="min-h-11">
+          {t("organize.submit")}
+        </Button>
       </form>
 
       <section aria-labelledby="existing-heading" className="space-y-3">
@@ -177,21 +183,21 @@ export function OrganizeCreatePage() {
           id="existing-heading"
           className="font-[family-name:var(--font-display)] text-2xl font-semibold"
         >
-          Вашите турнири
+          {t("organize.existingHeading")}
         </h2>
         {!ready ? (
-          <p role="status">Зареждане…</p>
+          <p role="status">{t("organize.loading")}</p>
         ) : tournaments.length === 0 ? (
-          <p className="text-[var(--tf-ink-muted)]">Все още няма турнири.</p>
+          <p className="text-[var(--tf-ink-muted)]">{t("organize.empty")}</p>
         ) : (
           <ul className="space-y-2">
-            {tournaments.map((t) => (
-              <li key={t.id}>
+            {tournaments.map((tournament) => (
+              <li key={tournament.id}>
                 <Link
-                  href={`/organize/${t.id}`}
+                  href={`/organize/${tournament.id}`}
                   className="inline-flex min-h-11 items-center font-medium underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
                 >
-                  {t.name}
+                  {tournament.name}
                 </Link>
               </li>
             ))}

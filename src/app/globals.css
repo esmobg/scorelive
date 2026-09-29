@@ -1,3 +1,4 @@
+/* Turnyfly AAA tokens — deep forest ink on misted sage; contrast ≥ 7:1 for body text */
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -5,18 +6,19 @@
 @custom-variant dark (&:is(.dark *));
 @custom-variant motion-safe (@media (prefers-reduced-motion: no-preference));
 
-/* Turnyfly AAA tokens — deep forest ink on misted sage; contrast ≥ 7:1 for body text */
 :root {
-  --tf-ink: #062618;
-  --tf-ink-muted: #1f3d30;
-  --tf-foam: #f3faf6;
-  --tf-mist: #d7ebe1;
-  --tf-line: #7a9a8a;
-  --tf-accent: #0b6b4a;
-  --tf-accent-deep: #084f37;
-  --tf-danger: #8b1a1a;
-  --tf-glow: #c6e86a;
-  --tf-sky: #9ec9b8;
+  --tf-ink: #041c12;
+  --tf-ink-muted: #163528;
+  --tf-foam: #f5fbf7;
+  --tf-mist: #d5ebe0;
+  --tf-line: #5f8574;
+  --tf-accent: #0a5f42;
+  --tf-accent-deep: #064530;
+  --tf-danger: #7a1212;
+  --tf-glow: #b8de4a;
+  --tf-sky: #7fb9a4;
+  --tf-surface: color-mix(in srgb, var(--tf-foam) 92%, white);
+  --tf-focus: #0a5f42;
 
   --background: var(--tf-mist);
   --foreground: var(--tf-ink);
@@ -26,31 +28,31 @@
   --popover-foreground: var(--tf-ink);
   --primary: var(--tf-accent-deep);
   --primary-foreground: #f4fff9;
-  --secondary: #cfe6da;
+  --secondary: #c6e0d3;
   --secondary-foreground: var(--tf-ink);
-  --muted: #c5ddd1;
+  --muted: #bdd6c9;
   --muted-foreground: var(--tf-ink-muted);
-  --accent: #b7ddc8;
+  --accent: #aed6c0;
   --accent-foreground: var(--tf-ink);
   --destructive: var(--tf-danger);
   --border: var(--tf-line);
-  --input: #9eb9ab;
-  --ring: var(--tf-accent);
+  --input: #8fad9e;
+  --ring: var(--tf-focus);
   --radius: 0.55rem;
 
-  --chart-1: #0b6b4a;
-  --chart-2: #1f3d30;
-  --chart-3: #5a7d6c;
-  --chart-4: #084f37;
-  --chart-5: #2f5a45;
+  --chart-1: #0a5f42;
+  --chart-2: #163528;
+  --chart-3: #4f7564;
+  --chart-4: #064530;
+  --chart-5: #2a5340;
   --sidebar: var(--tf-foam);
   --sidebar-foreground: var(--tf-ink);
   --sidebar-primary: var(--tf-accent-deep);
   --sidebar-primary-foreground: #f4fff9;
-  --sidebar-accent: #cfe6da;
+  --sidebar-accent: #c6e0d3;
   --sidebar-accent-foreground: var(--tf-ink);
   --sidebar-border: var(--tf-line);
-  --sidebar-ring: var(--tf-accent);
+  --sidebar-ring: var(--tf-focus);
 }
 
 @theme inline {
@@ -96,6 +98,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --animate-fade-up: fade-up 0.7s ease both;
+  --animate-mark-rise: mark-rise 0.9s ease both;
 }
 
 @keyframes fade-up {
@@ -106,6 +109,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes mark-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -135,17 +149,30 @@
 
   body {
     @apply bg-background text-foreground;
+    background-color: var(--tf-mist);
     background-image:
-      radial-gradient(ellipse 80% 50% at 10% -10%, color-mix(in srgb, var(--tf-glow) 45%, transparent), transparent 55%),
-      radial-gradient(ellipse 60% 40% at 100% 0%, color-mix(in srgb, var(--tf-sky) 55%, transparent), transparent 50%),
-      linear-gradient(180deg, #eaf6ef 0%, var(--tf-mist) 40%, #cfe3d8 100%);
+      radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--tf-glow) 42%, transparent), transparent 58%),
+      radial-gradient(ellipse 70% 45% at 100% 0%, color-mix(in srgb, var(--tf-sky) 48%, transparent), transparent 52%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, color-mix(in srgb, var(--tf-accent) 10%, transparent), transparent 60%),
+      linear-gradient(180deg, #e7f5ed 0%, var(--tf-mist) 42%, #c6dfd2 100%);
     background-attachment: fixed;
     min-height: 100%;
   }
 
   :focus-visible {
-    outline: 3px solid var(--tf-accent);
-    outline-offset: 2px;
+    outline: 3px solid var(--tf-focus);
+    outline-offset: 3px;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role="tab"]:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 3px solid var(--tf-focus);
+    outline-offset: 3px;
   }
 }
 
@@ -158,6 +185,7 @@
   border-radius: 0.5rem;
   font-weight: 600;
   text-decoration: none;
+  min-height: 44px;
 }
 
 .skip-link:focus {
@@ -168,9 +196,9 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  border-bottom: 1px solid color-mix(in srgb, var(--tf-line) 55%, transparent);
-  background: color-mix(in srgb, var(--tf-foam) 88%, transparent);
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--tf-line) 50%, transparent);
+  background: color-mix(in srgb, var(--tf-foam) 90%, transparent);
+  backdrop-filter: blur(12px);
 }
 
 .hero-panel {
@@ -184,14 +212,31 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(120deg, transparent 40%, color-mix(in srgb, var(--tf-glow) 28%, transparent) 100%),
-    radial-gradient(circle at 70% 40%, color-mix(in srgb, #1a7a58 22%, transparent), transparent 45%);
+    linear-gradient(125deg, transparent 35%, color-mix(in srgb, var(--tf-glow) 30%, transparent) 100%),
+    radial-gradient(circle at 72% 38%, color-mix(in srgb, #0d6b4c 24%, transparent), transparent 46%),
+    radial-gradient(circle at 18% 70%, color-mix(in srgb, var(--tf-sky) 28%, transparent), transparent 40%);
   opacity: 0.95;
+}
+
+.hero-grid {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--tf-line) 18%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--tf-line) 18%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 60% 40%, black, transparent 75%);
+  opacity: 0.35;
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .hero-atmosphere {
     animation: drift 18s ease-in-out infinite alternate;
+  }
+
+  .hero-grid {
+    animation: grid-shift 22s linear infinite alternate;
   }
 }
 
@@ -204,11 +249,46 @@
   }
 }
 
+@keyframes grid-shift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-12px, 8px, 0);
+  }
+}
+
 .section-title {
   font-family: var(--font-display), ui-sans-serif, sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--tf-ink);
+}
+
+.locale-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--tf-line) 70%, transparent);
+  border-radius: 0.55rem;
+  background: var(--tf-foam);
+  padding: 0.2rem;
+}
+
+.locale-toggle button {
+  min-height: 40px;
+  min-width: 44px;
+  border-radius: 0.4rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tf-ink-muted);
+}
+
+.locale-toggle button[aria-pressed="true"] {
+  background: var(--tf-accent-deep);
+  color: #f4fff9;
 }
 
 .sr-only {

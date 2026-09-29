@@ -1,3 +1,5 @@
+"use client";
+
 import type { StandingRow, Team } from "@/lib/tournament";
 import {
   Table,
@@ -7,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { TeamBadge } from "@/components/tournament/team-badge";
+import { useLocale } from "@/i18n/locale-provider";
 
 interface StandingsTableProps {
   title: string;
@@ -14,18 +18,16 @@ interface StandingsTableProps {
   teams: Team[];
 }
 
-function teamName(teams: Team[], id: string): string {
-  return teams.find((t) => t.id === id)?.name ?? id;
-}
-
 export function StandingsTable({ title, standings, teams }: StandingsTableProps) {
+  const { t } = useLocale();
+
   if (standings.length === 0) {
     return (
       <section aria-labelledby={`standings-${title}`}>
         <h3 id={`standings-${title}`} className="section-title">
           {title}
         </h3>
-        <p className="text-[var(--tf-ink-muted)]">Няма класиране все още.</p>
+        <p className="text-[var(--tf-ink-muted)]">{t("standings.empty")}</p>
       </section>
     );
   }
@@ -39,54 +41,58 @@ export function StandingsTable({ title, standings, teams }: StandingsTableProps)
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead scope="col">#</TableHead>
-              <TableHead scope="col">Отбор</TableHead>
+              <TableHead scope="col">{t("standings.colRank")}</TableHead>
+              <TableHead scope="col">{t("standings.colTeam")}</TableHead>
               <TableHead scope="col" className="text-right">
-                М
+                {t("standings.colPlayed")}
               </TableHead>
               <TableHead scope="col" className="text-right">
-                П
+                {t("standings.colWon")}
               </TableHead>
               <TableHead scope="col" className="text-right">
-                Р
+                {t("standings.colDrawn")}
               </TableHead>
               <TableHead scope="col" className="text-right">
-                З
+                {t("standings.colLost")}
               </TableHead>
               <TableHead scope="col" className="text-right">
-                ГР
+                {t("standings.colDiff")}
               </TableHead>
               <TableHead scope="col" className="text-right">
-                Т
+                {t("standings.colPoints")}
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {standings.map((row, index) => (
-              <TableRow key={row.teamId}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell className="font-medium">
-                  {teamName(teams, row.teamId)}
-                </TableCell>
-                <TableCell className="text-right">{row.played}</TableCell>
-                <TableCell className="text-right">{row.won}</TableCell>
-                <TableCell className="text-right">{row.drawn}</TableCell>
-                <TableCell className="text-right">{row.lost}</TableCell>
-                <TableCell className="text-right">
-                  {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
-                </TableCell>
-                <TableCell className="text-right font-semibold">
-                  {row.points}
-                </TableCell>
-              </TableRow>
-            ))}
+            {standings.map((row, index) => {
+              const team = teams.find((item) => item.id === row.teamId);
+              return (
+                <TableRow key={row.teamId}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    {team ? (
+                      <TeamBadge team={team} compact />
+                    ) : (
+                      row.teamId
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">{row.played}</TableCell>
+                  <TableCell className="text-right">{row.won}</TableCell>
+                  <TableCell className="text-right">{row.drawn}</TableCell>
+                  <TableCell className="text-right">{row.lost}</TableCell>
+                  <TableCell className="text-right">
+                    {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
+                  </TableCell>
+                  <TableCell className="text-right font-semibold">
+                    {row.points}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
-      <p className="text-xs text-[var(--tf-ink-muted)]">
-        М = мачове, П = победи, Р = равенства, З = загуби, ГР = гол разлика, Т =
-        точки
-      </p>
+      <p className="text-xs text-[var(--tf-ink-muted)]">{t("standings.legend")}</p>
     </section>
   );
 }

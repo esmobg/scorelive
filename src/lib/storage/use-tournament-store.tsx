@@ -43,7 +43,10 @@ function readStore(): StoreSnapshot {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   const onStorage = (event: StorageEvent) => {
-    if (event.key === "turnyfly.tournaments.v1") {
+    if (
+      event.key === "turnyfly.tournaments.v2" ||
+      event.key === "turnyfly.tournaments.v1"
+    ) {
       memoryCache = null;
       listener();
     }

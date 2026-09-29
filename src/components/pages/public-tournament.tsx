@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { computeStandings } from "@/lib/tournament";
+import { computeStandings, groupDisplayName } from "@/lib/tournament";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
+import { formatLabel } from "@/i18n";
+import { useLocale } from "@/i18n/locale-provider";
 import { StandingsTable } from "@/components/tournament/standings-table";
 import { BracketView } from "@/components/tournament/bracket-view";
 import { MatchList } from "@/components/tournament/match-list";
-import { formatLabels } from "@/components/tournament/tournament-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -16,6 +17,7 @@ export function PublicTournamentPage() {
   const params = useParams<{ id: string }>();
   const { getById, ready } = useTournamentStore();
   const tournament = getById(params.id);
+  const { t } = useLocale();
   const [tab, setTab] = useState<string | null>(null);
 
   const groupStandings = useMemo(() => {
@@ -36,7 +38,7 @@ export function PublicTournamentPage() {
     const groupMatches = tournament.matches.filter((m) => m.stage === "group");
     if (groupMatches.length === 0) return null;
     return computeStandings(
-      tournament.teams.map((t) => t.id),
+      tournament.teams.map((team) => team.id),
       groupMatches,
     );
   }, [tournament]);
@@ -44,7 +46,7 @@ export function PublicTournamentPage() {
   if (!ready) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
-        <p role="status">Зареждане на турнира…</p>
+        <p role="status">{t("public.loading")}</p>
       </div>
     );
   }
@@ -53,16 +55,14 @@ export function PublicTournamentPage() {
     return (
       <div className="mx-auto max-w-5xl space-y-4 px-4 py-10">
         <Alert>
-          <AlertTitle>Турнирът не е намерен</AlertTitle>
-          <AlertDescription>
-            Демо данните може да са изчистени. Върнете се към началото.
-          </AlertDescription>
+          <AlertTitle>{t("public.notFoundTitle")}</AlertTitle>
+          <AlertDescription>{t("public.notFoundBody")}</AlertDescription>
         </Alert>
         <Link
           href="/"
           className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
         >
-          Към началото
+          {t("public.backHome")}
         </Link>
       </div>
     );
@@ -88,15 +88,19 @@ export function PublicTournamentPage() {
           {tournament.name}
         </h1>
         <p className="text-[var(--tf-ink-muted)]">
-          {formatLabels[tournament.format]} · {tournament.startDate} —{" "}
-          {tournament.endDate} · {tournament.teams.length} участници
+          {t("public.meta", {
+            format: formatLabel(tournament.format, t),
+            start: tournament.startDate,
+            end: tournament.endDate,
+            count: tournament.teams.length,
+          })}
         </p>
         <p>
           <Link
             href={`/organize/${tournament.id}`}
-            className="text-sm font-medium underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+            className="inline-flex min-h-11 items-center text-sm font-medium underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
           >
-            Редактирай като организатор
+            {t("public.editAsOrganizer")}
           </Link>
         </p>
       </header>
@@ -109,14 +113,14 @@ export function PublicTournamentPage() {
           }
         }}
       >
-        <TabsList aria-label="Изгледи на турнира">
+        <TabsList aria-label={t("public.viewsLabel")}>
           {hasStandings ? (
-            <TabsTrigger value="standings">Класиране</TabsTrigger>
+            <TabsTrigger value="standings">{t("public.tabStandings")}</TabsTrigger>
           ) : null}
           {hasBracket ? (
-            <TabsTrigger value="bracket">Схема</TabsTrigger>
+            <TabsTrigger value="bracket">{t("public.tabBracket")}</TabsTrigger>
           ) : null}
-          <TabsTrigger value="matches">Мачове</TabsTrigger>
+          <TabsTrigger value="matches">{t("public.tabMatches")}</TabsTrigger>
         </TabsList>
 
         {hasStandings ? (
@@ -124,14 +128,14 @@ export function PublicTournamentPage() {
             {groupStandings.map(({ group, standings }) => (
               <StandingsTable
                 key={group.id}
-                title={group.name}
+                title={groupDisplayName(group.name, t)}
                 standings={standings}
                 teams={tournament.teams}
               />
             ))}
             {overallGroupStandings ? (
               <StandingsTable
-                title="Класиране"
+                title={t("public.standingsHeading")}
                 standings={overallGroupStandings}
                 teams={tournament.teams}
               />
@@ -144,6 +148,7 @@ export function PublicTournamentPage() {
             <BracketView
               matches={tournament.matches}
               teams={tournament.teams}
+              groups={tournament.groups}
             />
           </TabsContent>
         ) : null}
@@ -151,11 +156,12 @@ export function PublicTournamentPage() {
         <TabsContent value="matches" className="pt-4">
           <section aria-labelledby="matches-heading" className="space-y-3">
             <h2 id="matches-heading" className="section-title">
-              Мачове
+              {t("public.matchesHeading")}
             </h2>
             <MatchList
               matches={tournament.matches}
               teams={tournament.teams}
+              groups={tournament.groups}
             />
           </section>
         </TabsContent>

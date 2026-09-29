@@ -1,18 +1,17 @@
+"use client";
+
 import Link from "next/link";
 import type { Tournament, TournamentFormat } from "@/lib/tournament";
 import { Badge } from "@/components/ui/badge";
-
-const formatLabels: Record<TournamentFormat, string> = {
-  groups: "Групи",
-  knockout: "Елиминации",
-  groups_knockout: "Групи → елиминации",
-};
+import { formatLabel } from "@/i18n";
+import { useLocale } from "@/i18n/locale-provider";
 
 interface TournamentCardProps {
   tournament: Tournament;
 }
 
 export function TournamentCard({ tournament }: TournamentCardProps) {
+  const { t } = useLocale();
   const played = tournament.matches.filter(
     (m) => m.homeScore !== null && m.awayScore !== null,
   ).length;
@@ -34,27 +33,38 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
             {tournament.sport} · {tournament.startDate} — {tournament.endDate}
           </p>
         </div>
-        <Badge variant="secondary">{formatLabels[tournament.format]}</Badge>
+        <Badge variant="secondary">
+          {formatLabel(tournament.format, t)}
+        </Badge>
       </div>
       <p className="text-sm text-[var(--tf-ink)]">
-        {tournament.teams.length} отбора · {played}/{total || 0} изиграни мача
+        {t("card.teamsPlayed", {
+          teams: tournament.teams.length,
+          played,
+          total: total || 0,
+        })}
       </p>
       <div className="flex flex-wrap gap-3">
         <Link
           href={`/tournaments/${tournament.id}`}
           className="inline-flex min-h-11 items-center text-sm font-semibold text-[var(--tf-accent-deep)] underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
         >
-          Следвай турнира
+          {t("card.follow")}
         </Link>
         <Link
           href={`/organize/${tournament.id}`}
           className="inline-flex min-h-11 items-center text-sm font-medium text-[var(--tf-ink)] underline-offset-2 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
         >
-          Управление
+          {t("card.manage")}
         </Link>
       </div>
     </article>
   );
 }
 
-export { formatLabels };
+/** @deprecated Prefer formatLabel(format, t) from i18n — kept for gradual migration. */
+export const formatLabels: Record<TournamentFormat, string> = {
+  groups: "Групи",
+  knockout: "Елиминации",
+  groups_knockout: "Групи → елиминации",
+};

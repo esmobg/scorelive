@@ -1,14 +1,18 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { Match, Team } from "@/lib/tournament";
+import type { Group, Match, Team } from "@/lib/tournament";
+import { localizeMatchLabel } from "@/lib/tournament";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TeamBadge, findTeam } from "@/components/tournament/team-badge";
+import { useLocale } from "@/i18n/locale-provider";
 
 interface ScoreEntryFormProps {
   match: Match;
   teams: Team[];
+  groups?: Group[];
   onSave: (
     matchId: string,
     homeScore: number,
@@ -16,12 +20,13 @@ interface ScoreEntryFormProps {
   ) => void;
 }
 
-function teamName(teams: Team[], id: string | null): string {
-  if (!id) return "Чака се";
-  return teams.find((t) => t.id === id)?.name ?? "—";
-}
-
-export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
+export function ScoreEntryForm({
+  match,
+  teams,
+  groups = [],
+  onSave,
+}: ScoreEntryFormProps) {
+  const { t } = useLocale();
   const formId = useId();
   const [home, setHome] = useState(
     match.homeScore !== null ? String(match.homeScore) : "",
@@ -32,11 +37,16 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
   const [error, setError] = useState("");
 
   const ready = Boolean(match.homeTeamId && match.awayTeamId);
+  const homeTeam = findTeam(teams, match.homeTeamId);
+  const awayTeam = findTeam(teams, match.awayTeamId);
+  const homeName = homeTeam?.name ?? t("matches.waiting");
+  const awayName = awayTeam?.name ?? t("matches.waiting");
+  const label = localizeMatchLabel(match, groups, t);
 
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!ready) {
-      setError("Мачът още няма двата отбора.");
+      setError(t("score.errorNoTeams"));
       return;
     }
     const homeScore = Number(home);
@@ -47,11 +57,11 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
       homeScore < 0 ||
       awayScore < 0
     ) {
-      setError("Въведете цели неотрицателни числа за резултата.");
+      setError(t("score.errorNumbers"));
       return;
     }
     if (match.stage === "knockout" && homeScore === awayScore) {
-      setError("В елиминациите трябва да има победител (без равенство).");
+      setError(t("score.errorDraw"));
       return;
     }
     setError("");
@@ -64,20 +74,21 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
       className="space-y-3 rounded-md border border-[var(--tf-line)] bg-[var(--tf-foam)] p-4"
       aria-describedby={error ? `${formId}-error` : undefined}
     >
-      <div className="space-y-1">
+      <div className="space-y-2">
         <p className="text-xs font-medium uppercase tracking-wide text-[var(--tf-ink-muted)]">
-          {match.label}
+          {label}
         </p>
-        <p className="font-medium text-[var(--tf-ink)]">
-          {teamName(teams, match.homeTeamId)} —{" "}
-          {teamName(teams, match.awayTeamId)}
-        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          {homeTeam ? <TeamBadge team={homeTeam} compact /> : homeName}
+          <span className="text-[var(--tf-ink-muted)]">—</span>
+          {awayTeam ? <TeamBadge team={awayTeam} compact /> : awayName}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor={`${formId}-home`}>
-            Гостоприемник ({teamName(teams, match.homeTeamId)})
+            {t("score.home", { team: homeName })}
           </Label>
           <Input
             id={`${formId}-home`}
@@ -88,11 +99,12 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
             disabled={!ready}
             required
             aria-required="true"
+            className="min-h-11"
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor={`${formId}-away`}>
-            Гост ({teamName(teams, match.awayTeamId)})
+            {t("score.away", { team: awayName })}
           </Label>
           <Input
             id={`${formId}-away`}
@@ -103,6 +115,7 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
             disabled={!ready}
             required
             aria-required="true"
+            className="min-h-11"
           />
         </div>
       </div>
@@ -117,8 +130,8 @@ export function ScoreEntryForm({ match, teams, onSave }: ScoreEntryFormProps) {
         </p>
       ) : null}
 
-      <Button type="submit" disabled={!ready}>
-        Запази резултат
+      <Button type="submit" disabled={!ready} className="min-h-11">
+        {t("score.save")}
       </Button>
     </form>
   );
