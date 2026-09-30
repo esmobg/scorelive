@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   createEmptyTournament,
+  type ParticipantType,
   type TournamentFormat,
 } from "@/lib/tournament";
 import { useAuth } from "@/lib/auth/auth-provider";
@@ -40,6 +41,8 @@ export function OrganizeCreatePage() {
   const [sport, setSport] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [participantType, setParticipantType] =
+    useState<ParticipantType>("team");
   const [format, setFormat] = useState<TournamentFormat>("groups_knockout");
   const [groupCount, setGroupCount] = useState("2");
   const [error, setError] = useState("");
@@ -61,6 +64,7 @@ export function OrganizeCreatePage() {
       startDate,
       endDate,
       format,
+      participantType,
       groupCount: Number(groupCount) || 2,
       advancePerGroup: 2,
       ownerUsername: username ?? undefined,
@@ -76,6 +80,8 @@ export function OrganizeCreatePage() {
     }
     router.push(`/organize/${tournament.id}`);
   }
+
+  const isIndividual = participantType === "individual";
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-10 px-4 py-10 sm:px-6">
@@ -141,6 +147,56 @@ export function OrganizeCreatePage() {
             />
           </div>
         </div>
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-[var(--tf-ink)]">
+            {t("organize.participantType")}
+          </legend>
+          <div
+            className="grid gap-2 sm:grid-cols-2"
+            role="radiogroup"
+            aria-label={t("organize.participantType")}
+          >
+            <label
+              className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 ${
+                participantType === "team"
+                  ? "border-[var(--tf-accent)] bg-[var(--tf-accent)]/10"
+                  : "border-[var(--tf-line)]"
+              }`}
+            >
+              <input
+                type="radio"
+                name={`${formId}-participant`}
+                value="team"
+                checked={participantType === "team"}
+                onChange={() => setParticipantType("team")}
+                className="size-4 accent-[var(--tf-accent)]"
+              />
+              <span className="text-sm font-medium">
+                {t("organize.participantTypeTeam")}
+              </span>
+            </label>
+            <label
+              className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 ${
+                participantType === "individual"
+                  ? "border-[var(--tf-accent)] bg-[var(--tf-accent)]/10"
+                  : "border-[var(--tf-line)]"
+              }`}
+            >
+              <input
+                type="radio"
+                name={`${formId}-participant`}
+                value="individual"
+                checked={participantType === "individual"}
+                onChange={() => setParticipantType("individual")}
+                className="size-4 accent-[var(--tf-accent)]"
+                data-testid="participant-type-individual"
+              />
+              <span className="text-sm font-medium">
+                {t("organize.participantTypeIndividual")}
+              </span>
+            </label>
+          </div>
+        </fieldset>
         <div className="space-y-1.5">
           <Label htmlFor={`${formId}-format`}>{t("organize.format")}</Label>
           <Select
@@ -193,7 +249,9 @@ export function OrganizeCreatePage() {
         ) : null}
 
         <Button type="submit" className="min-h-11">
-          {t("organize.submit")}
+          {isIndividual
+            ? t("organize.submitIndividual")
+            : t("organize.submit")}
         </Button>
       </form>
 

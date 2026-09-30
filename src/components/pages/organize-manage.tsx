@@ -112,6 +112,8 @@ export function OrganizeManagePage() {
     );
   }
 
+  const isIndividual = tournament.participantType === "individual";
+
   async function handleLogoChange(file: File | null) {
     if (!file) {
       setLogoDataUrl(undefined);
@@ -155,10 +157,12 @@ export function OrganizeManagePage() {
   async function handleAddTeam(event: React.FormEvent) {
     event.preventDefault();
     if (!teamName.trim()) {
-      setFormError(t("manage.errorTeamName"));
+      setFormError(
+        t(isIndividual ? "manage.errorPlayerName" : "manage.errorTeamName"),
+      );
       return;
     }
-    if (!countryCode) {
+    if (!isIndividual && !countryCode) {
       setFormError(t("manage.errorCountry"));
       return;
     }
@@ -166,8 +170,8 @@ export function OrganizeManagePage() {
     const result = await save(
       addTeam(tournament!, {
         name: teamName,
-        countryCode,
-        logoDataUrl,
+        countryCode: countryCode || "BG",
+        ...(isIndividual ? {} : { logoDataUrl }),
       }),
     );
     if (reportSaveError(result)) {
@@ -180,7 +184,9 @@ export function OrganizeManagePage() {
 
   async function handleGenerate() {
     if (tournament!.teams.length < 2) {
-      setFormError(t("manage.errorMinTeams"));
+      setFormError(
+        t(isIndividual ? "manage.errorMinPlayers" : "manage.errorMinTeams"),
+      );
       return;
     }
     setFormError("");
@@ -259,7 +265,9 @@ export function OrganizeManagePage() {
 
       <Tabs defaultValue="teams">
         <TabsList aria-label={t("manage.tabsLabel")}>
-          <TabsTrigger value="teams">{t("manage.tabTeams")}</TabsTrigger>
+          <TabsTrigger value="teams">
+            {t(isIndividual ? "manage.tabPlayers" : "manage.tabTeams")}
+          </TabsTrigger>
           <TabsTrigger value="fixtures">{t("manage.tabFixtures")}</TabsTrigger>
           <TabsTrigger value="scores">{t("manage.tabScores")}</TabsTrigger>
         </TabsList>
@@ -268,7 +276,9 @@ export function OrganizeManagePage() {
           <form onSubmit={handleAddTeam} className="space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="team-name">{t("manage.teamName")}</Label>
+                <Label htmlFor="team-name">
+                  {t(isIndividual ? "manage.playerName" : "manage.teamName")}
+                </Label>
                 <Input
                   id="team-name"
                   value={teamName}
@@ -278,7 +288,13 @@ export function OrganizeManagePage() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="team-country">{t("manage.country")}</Label>
+                <Label htmlFor="team-country">
+                  {t(
+                    isIndividual
+                      ? "manage.countryOptional"
+                      : "manage.country",
+                  )}
+                </Label>
                 <Select
                   value={countryCode}
                   onValueChange={(value) => {
@@ -304,45 +320,47 @@ export function OrganizeManagePage() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="team-logo">{t("manage.logo")}</Label>
-              <Input
-                id="team-logo"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="min-h-11 cursor-pointer pt-2"
-                onChange={(e) => {
-                  void handleLogoChange(e.target.files?.[0] ?? null);
-                }}
-              />
-              <p className="text-xs text-[var(--tf-ink-muted)]">
-                {t("manage.logoHelp")}
-              </p>
-              <div aria-live="polite" className="min-h-5 text-sm font-medium text-[var(--tf-danger)]">
-                {logoStatus}
-              </div>
-              {logoDataUrl ? (
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={logoDataUrl}
-                    alt=""
-                    className="h-11 w-11 rounded-md border border-[var(--tf-line)] object-cover"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="min-h-11"
-                    onClick={() => {
-                      setLogoDataUrl(undefined);
-                      setLogoStatus("");
-                    }}
-                  >
-                    {t("manage.logoClear")}
-                  </Button>
+            {!isIndividual ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="team-logo">{t("manage.logo")}</Label>
+                <Input
+                  id="team-logo"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="min-h-11 cursor-pointer pt-2"
+                  onChange={(e) => {
+                    void handleLogoChange(e.target.files?.[0] ?? null);
+                  }}
+                />
+                <p className="text-xs text-[var(--tf-ink-muted)]">
+                  {t("manage.logoHelp")}
+                </p>
+                <div aria-live="polite" className="min-h-5 text-sm font-medium text-[var(--tf-danger)]">
+                  {logoStatus}
                 </div>
-              ) : null}
-            </div>
+                {logoDataUrl ? (
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={logoDataUrl}
+                      alt=""
+                      className="h-11 w-11 rounded-md border border-[var(--tf-line)] object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="min-h-11"
+                      onClick={() => {
+                        setLogoDataUrl(undefined);
+                        setLogoStatus("");
+                      }}
+                    >
+                      {t("manage.logoClear")}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
 
             <Button type="submit" className="min-h-11">
               {t("manage.addTeam")}
@@ -356,7 +374,9 @@ export function OrganizeManagePage() {
           ) : null}
 
           {tournament.teams.length === 0 ? (
-            <p className="text-[var(--tf-ink-muted)]">{t("manage.noTeams")}</p>
+            <p className="text-[var(--tf-ink-muted)]">
+              {t(isIndividual ? "manage.noPlayers" : "manage.noTeams")}
+            </p>
           ) : (
             <ul className="divide-y divide-[var(--tf-line)] rounded-lg border border-[var(--tf-line)] bg-[var(--tf-foam)]">
               {tournament.teams.map((team) => (
@@ -402,7 +422,11 @@ export function OrganizeManagePage() {
             matches={tournament.matches}
             teams={tournament.teams}
             groups={tournament.groups}
-            emptyMessage={t("manage.fixturesEmpty")}
+            emptyMessage={t(
+              isIndividual
+                ? "manage.fixturesEmptyPlayers"
+                : "manage.fixturesEmpty",
+            )}
           />
           {tournament.format === "swiss" ? (
             <Button
@@ -434,6 +458,7 @@ export function OrganizeManagePage() {
                 match={match}
                 teams={tournament.teams}
                 groups={tournament.groups}
+                participantType={tournament.participantType}
                 onSave={handleScore}
               />
             ))}

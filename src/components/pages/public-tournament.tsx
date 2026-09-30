@@ -228,6 +228,7 @@ export function PublicTournamentPage() {
                 title={groupDisplayName(group.name, t)}
                 standings={standings}
                 teams={tournament.teams}
+                participantType={tournament.participantType}
               />
             ))}
             {overallGroupStandings ? (
@@ -235,6 +236,7 @@ export function PublicTournamentPage() {
                 title={t("public.standingsHeading")}
                 standings={overallGroupStandings}
                 teams={tournament.teams}
+                participantType={tournament.participantType}
               />
             ) : null}
             {swissStandings ? (
@@ -243,6 +245,7 @@ export function PublicTournamentPage() {
                 standings={swissStandings}
                 teams={tournament.teams}
                 showBuchholz
+                participantType={tournament.participantType}
               />
             ) : null}
           </TabsContent>

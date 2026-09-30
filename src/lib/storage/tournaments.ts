@@ -6,6 +6,7 @@ import {
   type Team,
   type Tournament,
 } from "@/lib/tournament";
+import { coerceParticipantType } from "@/lib/api/tournament-payload";
 import { normalizeCountryCode } from "@/lib/countries";
 
 const STORAGE_KEY_V1 = "turnyfly.tournaments.v1";
@@ -46,7 +47,7 @@ function normalizeTournament(raw: unknown): Tournament | null {
   if (!raw || typeof raw !== "object") {
     return null;
   }
-  const t = raw as Tournament & { teams?: RawTeam[] };
+  const t = raw as Tournament & { teams?: RawTeam[]; participantType?: unknown };
   if (typeof t.id !== "string" || typeof t.name !== "string") {
     return null;
   }
@@ -61,6 +62,7 @@ function normalizeTournament(raw: unknown): Tournament | null {
       : undefined;
   return {
     ...t,
+    participantType: coerceParticipantType(t.participantType),
     teams,
     ...(ownerUsername ? { ownerUsername } : { ownerUsername: undefined }),
   };

@@ -2,15 +2,21 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/lib/db/client";
 import { ensureSchema } from "@/lib/db/migrate";
 import { tournaments, users, type DbTournament } from "@/lib/db/schema";
+import { coerceParticipantType } from "@/lib/api/tournament-payload";
 import type { Tournament } from "@/lib/tournament/types";
 
 function parsePayload(raw: string): Tournament | null {
   try {
-    const parsed = JSON.parse(raw) as Tournament;
+    const parsed = JSON.parse(raw) as Tournament & {
+      participantType?: unknown;
+    };
     if (!parsed || typeof parsed !== "object" || typeof parsed.id !== "string") {
       return null;
     }
-    return parsed;
+    return {
+      ...parsed,
+      participantType: coerceParticipantType(parsed.participantType),
+    };
   } catch {
     return null;
   }

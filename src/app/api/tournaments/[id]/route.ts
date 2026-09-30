@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { assertSameOrigin } from "@/lib/auth/request-guards";
 import { getSession } from "@/lib/auth/session";
-import { isTournamentPayload } from "@/lib/api/tournament-payload";
+import { isTournamentPayload, coerceParticipantType } from "@/lib/api/tournament-payload";
 import {
   deleteStoredTournament,
   getStoredTournament,
@@ -56,6 +56,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   const next: Tournament = {
     ...body.tournament,
     id,
+    participantType: coerceParticipantType(body.tournament.participantType),
     ownerUsername: user.username,
     createdAt: stored.tournament.createdAt,
   };

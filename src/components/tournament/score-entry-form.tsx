@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import type { Group, Match, Team } from "@/lib/tournament";
+import type { Group, Match, ParticipantType, Team } from "@/lib/tournament";
 import { localizeMatchLabel } from "@/lib/tournament";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ interface ScoreEntryFormProps {
   match: Match;
   teams: Team[];
   groups?: Group[];
+  participantType?: ParticipantType;
   onSave: (
     matchId: string,
     homeScore: number,
@@ -24,6 +25,7 @@ export function ScoreEntryForm({
   match,
   teams,
   groups = [],
+  participantType = "team",
   onSave,
 }: ScoreEntryFormProps) {
   const { t } = useLocale();
@@ -46,7 +48,13 @@ export function ScoreEntryForm({
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!ready) {
-      setError(t("score.errorNoTeams"));
+      setError(
+        t(
+          participantType === "individual"
+            ? "score.errorNoPlayers"
+            : "score.errorNoTeams",
+        ),
+      );
       return;
     }
     const homeScore = Number(home);

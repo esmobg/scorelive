@@ -5,6 +5,9 @@ export type TournamentFormat =
   | "league"
   | "swiss";
 
+/** Who competes: teams (clubs/squads) or individuals (athletes/players). */
+export type ParticipantType = "team" | "individual";
+
 export type MatchStage = "group" | "knockout" | "swiss";
 
 export type MatchSlot = "home" | "away";
@@ -55,6 +58,11 @@ export interface Tournament {
   startDate: string;
   endDate: string;
   format: TournamentFormat;
+  /**
+   * Competition mode. Defaults to `"team"` for legacy payloads and demos.
+   * Roster rows stay in `teams` (generic named IDs) either way.
+   */
+  participantType: ParticipantType;
   teams: Team[];
   groups: Group[];
   matches: Match[];
@@ -92,6 +100,7 @@ export interface CreateTournamentInput {
   startDate: string;
   endDate: string;
   format: TournamentFormat;
+  participantType?: ParticipantType;
   groupCount?: number;
   advancePerGroup?: number;
   swissRounds?: number;

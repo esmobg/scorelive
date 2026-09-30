@@ -6,4 +6,5 @@ export const FAQ_ITEM_KEYS = [
   ["faq.q4", "faq.a4"],
   ["faq.q5", "faq.a5"],
   ["faq.q6", "faq.a6"],
+  ["faq.q7", "faq.a7"],
 ] as const;

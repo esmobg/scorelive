@@ -42,11 +42,16 @@ export function TournamentCard({ tournament }: TournamentCardProps) {
         </div>
       </div>
       <p className="text-sm text-[var(--tf-ink)]">
-        {t("card.teamsPlayed", {
-          teams: tournament.teams.length,
-          played,
-          total: total || 0,
-        })}
+        {t(
+          tournament.participantType === "individual"
+            ? "card.playersPlayed"
+            : "card.teamsPlayed",
+          {
+            teams: tournament.teams.length,
+            played,
+            total: total || 0,
+          },
+        )}
       </p>
       <div className="flex flex-wrap gap-3">
         <Link

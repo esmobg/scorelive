@@ -1,6 +1,6 @@
 "use client";
 
-import type { StandingRow, Team } from "@/lib/tournament";
+import type { ParticipantType, StandingRow, Team } from "@/lib/tournament";
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ interface StandingsTableProps {
   standings: StandingRow[];
   teams: Team[];
   showBuchholz?: boolean;
+  participantType?: ParticipantType;
 }
 
 export function StandingsTable({
@@ -24,8 +25,13 @@ export function StandingsTable({
   standings,
   teams,
   showBuchholz = false,
+  participantType = "team",
 }: StandingsTableProps) {
   const { t } = useLocale();
+  const colLabel =
+    participantType === "individual"
+      ? t("standings.colPlayer")
+      : t("standings.colTeam");
 
   if (standings.length === 0) {
     return (
@@ -48,7 +54,7 @@ export function StandingsTable({
           <TableHeader>
             <TableRow>
               <TableHead scope="col">{t("standings.colRank")}</TableHead>
-              <TableHead scope="col">{t("standings.colTeam")}</TableHead>
+              <TableHead scope="col">{colLabel}</TableHead>
               <TableHead scope="col" className="text-right">
                 {t("standings.colPlayed")}
               </TableHead>

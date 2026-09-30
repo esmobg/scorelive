@@ -19,6 +19,8 @@ export function createEmptyTournament(input: CreateTournamentInput): Tournament 
   const now = new Date().toISOString();
   const owner =
     typeof input.ownerUsername === "string" ? input.ownerUsername.trim() : "";
+  const participantType =
+    input.participantType === "individual" ? "individual" : "team";
   return {
     id: createId("t"),
     name: input.name.trim(),
@@ -26,6 +28,7 @@ export function createEmptyTournament(input: CreateTournamentInput): Tournament 
     startDate: input.startDate,
     endDate: input.endDate,
     format: input.format,
+    participantType,
     teams: [],
     groups: [],
     matches: [],

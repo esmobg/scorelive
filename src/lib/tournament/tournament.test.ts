@@ -166,3 +166,47 @@ describe("fixtures + score entry", () => {
     expect(standings[0].points).toBeGreaterThanOrEqual(standings[1].points);
   });
 });
+
+describe("participantType", () => {
+  it("defaults to team when omitted", () => {
+    const tournament = createEmptyTournament({
+      name: "Default",
+      sport: "Football",
+      startDate: "2026-01-01",
+      endDate: "2026-01-02",
+      format: "league",
+    });
+    expect(tournament.participantType).toBe("team");
+  });
+
+  it("persists individual and generates fixtures for every format", () => {
+    const formats = [
+      "groups",
+      "knockout",
+      "groups_knockout",
+      "league",
+      "swiss",
+    ] as const;
+
+    for (const format of formats) {
+      let tournament = createEmptyTournament({
+        name: `Individual ${format}`,
+        sport: "Chess",
+        startDate: "2026-01-01",
+        endDate: "2026-01-03",
+        format,
+        participantType: "individual",
+        groupCount: 2,
+        advancePerGroup: 2,
+      });
+      expect(tournament.participantType).toBe("individual");
+
+      for (const name of ["Ana", "Borislav", "Clara", "Dimitar"]) {
+        tournament = addTeam(tournament, name);
+      }
+      tournament = generateFixtures(tournament);
+      expect(tournament.participantType).toBe("individual");
+      expect(tournament.matches.length).toBeGreaterThan(0);
+    }
+  });
+});

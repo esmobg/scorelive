@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { assertSameOrigin } from "@/lib/auth/request-guards";
 import { getSession } from "@/lib/auth/session";
-import { isTournamentPayload } from "@/lib/api/tournament-payload";
+import { isTournamentPayload, coerceParticipantType } from "@/lib/api/tournament-payload";
 import {
   insertTournament,
   listStoredTournaments,
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
   const tournament: Tournament = {
     ...incoming,
     id,
+    participantType: coerceParticipantType(incoming.participantType),
     ownerUsername: user.username,
   };
 
