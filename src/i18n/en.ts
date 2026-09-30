@@ -376,36 +376,36 @@ export const en = {
 
   "privacy.title": "Privacy policy",
   "privacy.lead":
-    "How ScoreLive handles organizer accounts, tournaments, sessions, and optional password-reset email.",
+    "How ScoreLive handles organizer accounts, tournaments, sessions, and password recovery.",
   "privacy.s1Title": "What we collect",
   "privacy.s1Body":
-    "On registration: username, a password hash, and an optional email for account recovery. When you organize: tournaments, teams, matches, and scores tied to your account. Favorites are stored for signed-in users. This version has no payments or external identity providers (OAuth).",
+    "On registration: username, a password hash, and an optional email for account recovery. When you organize: tournaments (team or individual), entrants, matches, and scores tied to your account. Favorites are stored for signed-in users. ScoreLive does not process payments and does not use external identity providers (OAuth).",
   "privacy.s2Title": "Where data is hosted",
   "privacy.s2Body":
-    "The app runs on Vercel. Durable data (users, revocable sessions, tournaments, favorites, auth rate-limit counters, password-reset tokens) lives in Turso (libSQL). Demo tournaments may remain in the browser (localStorage).",
+    "The app runs on Vercel. Durable data lives in Turso (libSQL): users, revocable sessions, tournaments, favorites, auth rate-limit counters, and password-reset tokens. Demo tournaments may remain in the browser (localStorage).",
   "privacy.s3Title": "Cookies and sessions",
   "privacy.s3Body":
-    "We use HttpOnly session cookies (HMAC plus a session id) to keep you signed in. Sessions are stored in Turso and can be revoked on logout or after a password reset. A favorites cookie helps sync guest favorites. ScoreLive does not set advertising or third-party tracking cookies.",
-  "privacy.s4Title": "Password reset email",
+    "We use HttpOnly session cookies (HMAC plus a session id) to keep you signed in. Sessions are stored in Turso and are revoked on logout or after a successful password reset. A favorites cookie helps sync guest favorites. ScoreLive does not set advertising or third-party tracking cookies.",
+  "privacy.s4Title": "Password reset",
   "privacy.s4Body":
-    "If you request a password reset and your account has an email, we may send a one-time reset link when Resend is configured (RESEND_API_KEY and a from address). Without that configuration, the reset link is written only to server logs for the operator. Reset tokens are stored hashed, expire after one hour, and are single-use.",
+    "If you request a password reset and your account has an email on file, ScoreLive can send a one-time reset link by email when email delivery is configured. Until then, reset links are available only to the site operator via server logs. Reset tokens are stored hashed, expire after one hour, and are single-use. Username-only accounts cannot receive email recovery.",
   "privacy.s5Title": "Contact",
   "privacy.s5Body":
-    "For data questions, open an issue on the public GitHub repository: esmobg/turnyfly.",
+    "For privacy questions or data requests, open a GitHub issue: https://github.com/esmobg/turnyfly/issues",
 
   "terms.title": "Terms of use",
   "terms.lead":
     "Rules for using ScoreLive as an open tournament platform.",
   "terms.s1Title": "The service",
   "terms.s1Body":
-    "ScoreLive lets you register an organizer account, create and share tournaments, enter scores, and reset a forgotten password with a secure link. The product is open source (MIT). This version has no payments, subscriptions, or OAuth.",
+    "ScoreLive lets you register an organizer account, create and share team or individual tournaments, enter scores, follow live standings, and reset a forgotten password with a secure link. The product is open source (MIT). There are no payments, subscriptions, or OAuth logins in this version.",
   "terms.s2Title": "Your responsibilities",
   "terms.s2Body":
-    "You are responsible for your password and for the content of tournaments you publish. Keep recovery email accurate if you rely on password-reset messages. Do not abuse the API (for example automated login or reset attempts). We rate-limit auth requests per IP in Turso to reduce abuse.",
+    "You are responsible for your password and for the content of tournaments you publish. Keep a recovery email on your account if you want password-reset messages by email. Do not abuse the API (for example automated login or reset attempts). Auth requests are rate-limited per IP in Turso.",
   "terms.s3Title": "Availability and data",
   "terms.s3Body":
     "The service is provided as-is. Outages or data loss can occur even with host-side backups. Keep critical results elsewhere if they matter.",
   "terms.s4Title": "Contact",
   "terms.s4Body":
-    "For feedback and issue reports: the GitHub repository esmobg/turnyfly.",
+    "Feedback and bug reports: https://github.com/esmobg/turnyfly/issues",
 } as const satisfies Messages;

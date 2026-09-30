@@ -51,16 +51,40 @@ Set on the Vercel project `scorelive` (Production + Preview):
 | `TURNYFLY_SESSION_SECRET` | **Required in production** (min 32 chars). Fail-closed if missing. |
 | `DEMO_ADMIN_ENABLED` | Keep unset/`false` in production. |
 | `NEXT_PUBLIC_SITE_URL` | `https://scorelive-app.vercel.app` |
-| `RESEND_API_KEY` | Optional. When set with `RESEND_FROM_EMAIL`, password-reset emails are sent via Resend. |
-| `RESEND_FROM_EMAIL` | Optional from address for Resend (e.g. `ScoreLive <noreply@…>`). |
+| `RESEND_API_KEY` | Optional. With a from address, password-reset emails go via Resend. **Unset today → log-only.** |
+| `RESEND_FROM_EMAIL` | Preferred from address (e.g. `ScoreLive <noreply@…>`). Aliases: `RESEND_FROM`, `EMAIL_FROM`. |
 
 ```bash
-printf '%s' "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL production --project scorelive
-printf '%s' "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN production --project scorelive
-vercel --prod --yes --project scorelive
+printf '%s' "$TURSO_DATABASE_URL" | npx vercel env add TURSO_DATABASE_URL production --scope esmobgs-projects --project scorelive
+printf '%s' "$TURSO_AUTH_TOKEN" | npx vercel env add TURSO_AUTH_TOKEN production --scope esmobgs-projects --project scorelive
+npx vercel deploy --prod --yes --scope esmobgs-projects --project scorelive
 ```
 
 Schema is applied automatically on first API use (`ensureSchema`).
+
+### Password-reset email (Resend — optional, off by default)
+
+Forgot/reset password works without Resend: tokens are stored hashed in Turso, and the one-time reset URL is written to **server logs** (Vercel → project `scorelive` → Logs). That is intentional production behavior until you add keys.
+
+Exact env names to add later on Vercel (**Production + Preview**):
+
+| Name | Required with | Purpose |
+| --- | --- | --- |
+| `RESEND_API_KEY` | a from address | Resend API key |
+| `RESEND_FROM_EMAIL` | `RESEND_API_KEY` | From address (preferred) |
+| `RESEND_FROM` | `RESEND_API_KEY` | Alias for from |
+| `EMAIL_FROM` | `RESEND_API_KEY` | Second from alias |
+
+```bash
+# Only when you have a real Resend key + verified sending domain — do not invent secrets.
+printf '%s' 're_YOUR_KEY' | npx vercel env add RESEND_API_KEY production --scope esmobgs-projects --project scorelive
+printf '%s' 're_YOUR_KEY' | npx vercel env add RESEND_API_KEY preview --scope esmobgs-projects --project scorelive
+printf '%s' 'ScoreLive <noreply@your-domain>' | npx vercel env add RESEND_FROM_EMAIL production --scope esmobgs-projects --project scorelive
+printf '%s' 'ScoreLive <noreply@your-domain>' | npx vercel env add RESEND_FROM_EMAIL preview --scope esmobgs-projects --project scorelive
+npx vercel deploy --prod --yes --scope esmobgs-projects --project scorelive
+```
+
+Accounts registered with the optional email field can receive reset mail once Resend is configured. Username-only accounts still get a generic success response (no enumeration) and log-only delivery.
 
 ### Demo admin (local / e2e only)
 
@@ -114,7 +138,7 @@ Built-in demo admin is **enabled in local development** and **disabled on produc
 - `TURSO_AUTH_TOKEN`
 - `NEXT_PUBLIC_SITE_URL` (`https://scorelive-app.vercel.app`)
 - `DEMO_ADMIN_ENABLED` unset / `false`
-- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` optional (password-reset email)
+- `RESEND_API_KEY` + `RESEND_FROM_EMAIL` (or `RESEND_FROM` / `EMAIL_FROM`) — optional; **currently unset → password-reset links are log-only**
 
 ### Backup / restore (Turso)
 
@@ -127,7 +151,7 @@ Schema auto-migrates on first API use (`ensureSchema`) for new tables (`sessions
 
 ## Out of scope
 
-OAuth, email password reset, payments, accelerated/Dutch Swiss variants, automatic migration of every old localStorage tournament, referee assignment, drag-drop scheduler, native apps, TV slideshow mode.
+OAuth, payments, accelerated/Dutch Swiss variants, automatic migration of every old localStorage tournament, referee assignment, drag-drop scheduler, native apps, TV slideshow mode. (Password reset is in scope: email via Resend when configured, otherwise server-log delivery.)
 
 ## License
 

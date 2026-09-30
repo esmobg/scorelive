@@ -1,8 +1,13 @@
 import type { NextConfig } from "next";
 
 /**
- * Production CSP: no 'unsafe-eval'. Keep 'unsafe-inline' for Next.js
- * App Router inline bootstrap / styles (nonce wiring would be a larger rewrite).
+ * Production CSP for Next.js App Router.
+ * - No 'unsafe-eval' (verified).
+ * - script-src keeps 'unsafe-inline': Next injects inline bootstrap/hydration
+ *   scripts; removing it breaks the app. Nonce wiring is a larger rewrite and
+ *   was not adopted for this pass.
+ * - style-src uses 'self' only: Tailwind/CSS files cover styles without
+ *   requiring 'unsafe-inline' for this app.
  */
 export const contentSecurityPolicy = [
   "default-src 'self'",
@@ -11,7 +16,7 @@ export const contentSecurityPolicy = [
   "frame-ancestors 'none'",
   "object-src 'none'",
   "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
   "connect-src 'self'",

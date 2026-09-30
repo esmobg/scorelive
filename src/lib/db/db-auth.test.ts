@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import { resetDbClientsForTests } from "@/lib/db/client";
@@ -243,6 +243,39 @@ describe("password reset tokens", () => {
     await expect(
       requestPasswordReset({ identifier: "known@example.com", request }),
     ).resolves.toEqual({ ok: true });
+  });
+
+  it("username-only accounts still get generic success without calling Resend", async () => {
+    await ensureSchema();
+    await registerOrganizer({
+      username: "no_email_user",
+      password: "securepass1",
+      confirmPassword: "securepass1",
+    });
+    const fetchMock = vi.fn();
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = fetchMock as typeof fetch;
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const request = new Request("http://localhost/api/auth/forgot-password", {
+      method: "POST",
+      headers: { host: "localhost" },
+    });
+    try {
+      await expect(
+        requestPasswordReset({ identifier: "no_email_user", request }),
+      ).resolves.toEqual({ ok: true });
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(info).toHaveBeenCalled();
+      const logged = JSON.parse(String(info.mock.calls[0]?.[0])) as {
+        note?: string;
+        to: string | null;
+      };
+      expect(logged.note).toBe("user_has_no_email");
+      expect(logged.to).toBeNull();
+    } finally {
+      globalThis.fetch = originalFetch;
+      info.mockRestore();
+    }
   });
 });
 

@@ -8,11 +8,17 @@ export type ResetEmailResult =
   | { channel: "resend"; ok: false; error: string }
   | { channel: "log"; ok: true };
 
+/**
+ * Resend is optional. Production ships without keys — reset links go to
+ * server logs until RESEND_API_KEY and a from address are configured.
+ * From address aliases (first match wins): RESEND_FROM_EMAIL, RESEND_FROM, EMAIL_FROM.
+ */
 function resendConfig(): { apiKey: string; from: string } | null {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from =
     process.env.RESEND_FROM_EMAIL?.trim() ||
     process.env.RESEND_FROM?.trim() ||
+    process.env.EMAIL_FROM?.trim() ||
     "";
   if (!apiKey || !from) {
     return null;
