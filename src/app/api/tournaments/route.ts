@@ -19,7 +19,7 @@ export async function GET() {
   const tournaments = rows.map((r) => r.tournament);
   return NextResponse.json({
     tournaments,
-    ...(isRemoteTursoConfigured() ? {} : { db: "local_or_unavailable" }),
+    db: isRemoteTursoConfigured() ? "turso" : "file",
   });
 }
 
