@@ -36,10 +36,7 @@ export async function POST(request: Request) {
       { error: "rate_limited" },
       {
         status: 429,
-        headers: {
-          "Retry-After": String(limited.retryAfterSec),
-          "X-ScoreLive-RL": String(limited.count),
-        },
+        headers: { "Retry-After": String(limited.retryAfterSec) },
       },
     );
   }
@@ -69,13 +66,7 @@ export async function POST(request: Request) {
     );
   }
   if (!ok) {
-    return NextResponse.json(
-      { error: "invalid_credentials" },
-      {
-        status: 401,
-        headers: { "X-ScoreLive-RL": String(limited.count) },
-      },
-    );
+    return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
 
   let token: string;
