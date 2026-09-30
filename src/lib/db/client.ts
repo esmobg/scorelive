@@ -57,4 +57,4 @@ export function resetDbClientsForTests(): void {
   delete g.__scoreliveDbMigrated;
 }
 
-export const SCHEMA_GENERATION = 2;
+export const SCHEMA_GENERATION = 3;

@@ -18,12 +18,12 @@ export async function incrementAuthRateLimit(input: {
   const resetIso = new Date(resetAt).toISOString();
 
   await client.execute({
-    sql: `INSERT INTO auth_rate_limits (key, count, reset_at)
+    sql: `INSERT INTO auth_rate_limits (key, hit_count, reset_at)
           VALUES (?, 1, ?)
           ON CONFLICT(key) DO UPDATE SET
-            count = CASE
+            hit_count = CASE
               WHEN auth_rate_limits.reset_at <= ? THEN 1
-              ELSE auth_rate_limits.count + 1
+              ELSE auth_rate_limits.hit_count + 1
             END,
             reset_at = CASE
               WHEN auth_rate_limits.reset_at <= ? THEN excluded.reset_at
@@ -33,15 +33,20 @@ export async function incrementAuthRateLimit(input: {
   });
 
   const row = await client.execute({
-    sql: `SELECT count, reset_at FROM auth_rate_limits WHERE key = ? LIMIT 1`,
+    sql: `SELECT hit_count AS hits, reset_at AS resets FROM auth_rate_limits WHERE key = ? LIMIT 1`,
     args: [input.key],
   });
   const selected = row.rows[0];
   if (!selected) {
     throw new Error("auth_rate_limits upsert did not persist a row");
   }
+  const hits = Number(selected.hits ?? selected[0]);
+  const resetRaw = String(selected.resets ?? selected[1] ?? "");
+  if (!Number.isFinite(hits) || !resetRaw) {
+    throw new Error("auth_rate_limits row malformed");
+  }
   return {
-    count: Number(selected.count),
-    resetAt: Date.parse(String(selected.reset_at)),
+    count: hits,
+    resetAt: Date.parse(resetRaw),
   };
 }

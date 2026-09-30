@@ -39,7 +39,7 @@ export const sessions = sqliteTable("sessions", {
 /** Durable IP/minute auth rate-limit counters (shared across Vercel isolates). */
 export const authRateLimits = sqliteTable("auth_rate_limits", {
   key: text("key").primaryKey(),
-  count: integer("count").notNull(),
+  hitCount: integer("hit_count").notNull(),
   resetAt: text("reset_at").notNull(),
 });
 

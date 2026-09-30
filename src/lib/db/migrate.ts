@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 
 CREATE TABLE IF NOT EXISTS auth_rate_limits (
   key TEXT PRIMARY KEY NOT NULL,
-  count INTEGER NOT NULL,
+  hit_count INTEGER NOT NULL,
   reset_at TEXT NOT NULL
 );
 
@@ -62,6 +62,21 @@ export async function ensureSchema(): Promise<void> {
 
   for (const sql of statements) {
     await client.execute(sql);
+  }
+
+  // Rename legacy `count` column if an older schema generation created it.
+  try {
+    const cols = await client.execute(`PRAGMA table_info(auth_rate_limits)`);
+    const names = new Set(
+      cols.rows.map((row) => String(row.name ?? row[1] ?? "")),
+    );
+    if (names.has("count") && !names.has("hit_count")) {
+      await client.execute(
+        `ALTER TABLE auth_rate_limits RENAME COLUMN count TO hit_count`,
+      );
+    }
+  } catch (error) {
+    console.error("[scorelive-migrate-rate-limits]", error);
   }
 
   g.__scoreliveDbMigrated = SCHEMA_GENERATION;
