@@ -51,6 +51,8 @@ Set on the Vercel project `scorelive` (Production + Preview):
 | `TURNYFLY_SESSION_SECRET` | **Required in production** (min 32 chars). Fail-closed if missing. |
 | `DEMO_ADMIN_ENABLED` | Keep unset/`false` in production. |
 | `NEXT_PUBLIC_SITE_URL` | `https://scorelive-app.vercel.app` |
+| `RESEND_API_KEY` | Optional. When set with `RESEND_FROM_EMAIL`, password-reset emails are sent via Resend. |
+| `RESEND_FROM_EMAIL` | Optional from address for Resend (e.g. `ScoreLive <noreply@…>`). |
 
 ```bash
 printf '%s' "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL production --project scorelive
@@ -84,9 +86,10 @@ Built-in demo admin is **enabled in local development** and **disabled on produc
 
 - Discover home with demo tournaments + how-it-works / CTA sections
 - Content pages: About, How it works, FAQ, Privacy, Terms
-- Organizer flow: register/login (Turso users + revocable sessions), create tournament (DB), add teams, generate fixtures, enter scores
+- Organizer flow: register/login (Turso users + revocable sessions), forgot/reset password, create tournament (DB), add teams, generate fixtures, enter scores
 - Owner ACL on tournament PATCH/DELETE APIs (scores only via owner PATCH)
 - Durable auth rate limits + `GET /api/health`
+- Password reset tokens in Turso; Resend email when configured, otherwise server-log fallback
 - Formats: groups, knockout, groups → knockout, league, **Swiss** (pairing by points, no rematches, bye, Buchholz)
 - Favorites for logged-in users in Turso; guests keep localStorage + cookie sync
 - Dark / light theme toggle (localStorage + `prefers-color-scheme`)
@@ -111,6 +114,7 @@ Built-in demo admin is **enabled in local development** and **disabled on produc
 - `TURSO_AUTH_TOKEN`
 - `NEXT_PUBLIC_SITE_URL` (`https://scorelive-app.vercel.app`)
 - `DEMO_ADMIN_ENABLED` unset / `false`
+- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` optional (password-reset email)
 
 ### Backup / restore (Turso)
 

@@ -25,7 +25,17 @@ import {
   revokeSession,
 } from "@/lib/db/sessions";
 import { incrementAuthRateLimit } from "@/lib/db/rate-limits";
+import {
+  findActiveResetToken,
+  hashResetToken,
+  insertPasswordResetToken,
+  newRawResetToken,
+} from "@/lib/db/password-reset";
 import { createEmptyTournament } from "@/lib/tournament";
+import {
+  requestPasswordReset,
+  resetPasswordWithToken,
+} from "@/lib/auth/password-reset";
 import { registerOrganizer, verifyOrganizerCredentials } from "@/lib/auth/organizers";
 import {
   AUTH_RATE_LIMIT,
@@ -158,6 +168,81 @@ describe("revocable sessions", () => {
     expect(await verifySessionToken(token)).not.toBeNull();
     expect(await isSessionActive(jti)).toBe(false);
     expect(await resolveSession(token)).toBeNull();
+  });
+});
+
+describe("password reset tokens", () => {
+  it("stores hashed tokens and completes a reset once", async () => {
+    await ensureSchema();
+    const registered = await registerOrganizer({
+      username: "reset_user",
+      password: "oldpass12",
+      confirmPassword: "oldpass12",
+      email: "reset_user@example.com",
+    });
+    expect(registered.ok).toBe(true);
+
+    const raw = newRawResetToken();
+    await insertPasswordResetToken({
+      username: "reset_user",
+      rawToken: raw,
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+    const active = await findActiveResetToken(raw);
+    expect(active?.username).toBe("reset_user");
+    expect(active?.tokenHash).toBe(hashResetToken(raw));
+    expect(active?.tokenHash).not.toBe(raw);
+
+    const sessionToken = await mintSession("reset_user");
+    expect(await resolveSession(sessionToken)).not.toBeNull();
+
+    const reset = await resetPasswordWithToken({
+      token: raw,
+      password: "newpass34",
+      confirmPassword: "newpass34",
+    });
+    expect(reset.ok).toBe(true);
+    expect(await verifyOrganizerCredentials("reset_user", "newpass34")).toBe(
+      true,
+    );
+    expect(await verifyOrganizerCredentials("reset_user", "oldpass12")).toBe(
+      false,
+    );
+    expect(await findActiveResetToken(raw)).toBeNull();
+    expect(await resolveSession(sessionToken)).toBeNull();
+
+    const reused = await resetPasswordWithToken({
+      token: raw,
+      password: "another99",
+      confirmPassword: "another99",
+    });
+    expect(reused.ok).toBe(false);
+    if (!reused.ok) {
+      expect(reused.error).toBe("invalid_token");
+    }
+  });
+
+  it("requestPasswordReset always succeeds and does not enumerate users", async () => {
+    await ensureSchema();
+    await registerOrganizer({
+      username: "known_reset",
+      password: "securepass1",
+      confirmPassword: "securepass1",
+      email: "known@example.com",
+    });
+    const request = new Request("http://localhost/api/auth/forgot-password", {
+      method: "POST",
+      headers: { host: "localhost" },
+    });
+    await expect(
+      requestPasswordReset({ identifier: "known_reset", request }),
+    ).resolves.toEqual({ ok: true });
+    await expect(
+      requestPasswordReset({ identifier: "missing_user_xyz", request }),
+    ).resolves.toEqual({ ok: true });
+    await expect(
+      requestPasswordReset({ identifier: "known@example.com", request }),
+    ).resolves.toEqual({ ok: true });
   });
 });
 

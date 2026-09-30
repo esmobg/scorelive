@@ -181,6 +181,7 @@ export const en = {
     "Organizer log in unlocks tournament creation and score entry.",
   "login.username": "Username",
   "login.password": "Password",
+  "login.forgot": "Forgot password?",
   "login.submit": "Log in",
   "login.error": "Invalid username or password.",
   "login.loading": "Checking…",
@@ -192,6 +193,9 @@ export const en = {
     "Create an account to organize tournaments and enter scores.",
   "register.username": "Username",
   "register.usernameHelp": "3–32 characters: letters, numbers, or _",
+  "register.email": "Email (optional)",
+  "register.emailHelp":
+    "Used only for password-reset messages when email delivery is configured.",
   "register.password": "Password",
   "register.passwordHelp": "At least 8 characters.",
   "register.confirmPassword": "Confirm password",
@@ -203,6 +207,35 @@ export const en = {
   "register.errorPassword": "Password must be at least 8 characters.",
   "register.errorMismatch": "Passwords do not match.",
   "register.errorTaken": "That username is already taken.",
+  "register.errorEmail": "Enter a valid email address.",
+  "register.errorEmailTaken": "That email is already registered.",
+
+  "forgot.title": "Forgot password",
+  "forgot.lead":
+    "Enter your username or the email on your account. If we find a match, we send a reset link when email delivery is configured — otherwise the link is logged for the operator.",
+  "forgot.identifier": "Username or email",
+  "forgot.identifierHelp":
+    "We always show the same confirmation — we do not reveal whether an account exists.",
+  "forgot.submit": "Send reset link",
+  "forgot.loading": "Sending…",
+  "forgot.success":
+    "If an account matches, a password reset link was prepared. Check your email when delivery is configured, or ask the operator if you use a local setup.",
+  "forgot.error": "Something went wrong. Please try again shortly.",
+  "forgot.backLogin": "Back to log in",
+
+  "reset.title": "Choose a new password",
+  "reset.lead": "Set a new password for your organizer account.",
+  "reset.password": "New password",
+  "reset.passwordHelp": "At least 8 characters.",
+  "reset.confirmPassword": "Confirm new password",
+  "reset.submit": "Update password",
+  "reset.loading": "Updating…",
+  "reset.success": "Password updated. You can log in with the new password.",
+  "reset.error": "Could not reset the password. Please try again.",
+  "reset.errorToken":
+    "This reset link is invalid or has expired. Request a new one.",
+  "reset.errorPassword": "Password must be at least 8 characters.",
+  "reset.errorMismatch": "Passwords do not match.",
 
   "auth.requiredTitle": "Log in required",
   "auth.requiredBody":
@@ -253,7 +286,7 @@ export const en = {
     "League: round-robin, everyone plays everyone, points 3/1/0. Swiss: several rounds paired by points, no rematches, Buchholz tie-break.",
   "faq.q5": "Are there payments or OAuth?",
   "faq.a5":
-    "Not in this version. No payments, email password reset, or external identity providers.",
+    "Not in this version. No payments or external identity providers. Password reset is available via a secure link (email when Resend is configured).",
   "faq.q6": "How do I change language or theme?",
   "faq.a6":
     "Use the BG/EN and light/dark toggles in the header. The page lang attribute follows the selected language.",
@@ -322,33 +355,32 @@ export const en = {
 
   "privacy.title": "Privacy policy",
   "privacy.lead":
-    "How ScoreLive handles data with open registration, no payments, and no OAuth.",
-  "privacy.reviewNote":
-    "This copy is an operator-reviewable draft for the ScoreLive product — not legal advice. Review it before a marketing launch.",
+    "How ScoreLive handles organizer accounts, tournaments, sessions, and optional password-reset email.",
   "privacy.s1Title": "What we collect",
   "privacy.s1Body":
-    "On registration: username and a password hash. When you organize: tournaments, teams, matches, and scores tied to your account. Favorites are stored for signed-in users. This version has no payments, profile emails, or external identity providers.",
+    "On registration: username, a password hash, and an optional email for account recovery. When you organize: tournaments, teams, matches, and scores tied to your account. Favorites are stored for signed-in users. This version has no payments or external identity providers (OAuth).",
   "privacy.s2Title": "Where data is hosted",
   "privacy.s2Body":
-    "The app runs on Vercel. Durable data (users, sessions, tournaments, favorites, auth rate-limit counters) lives in Turso (libSQL). Demo tournaments may remain in the browser (localStorage).",
+    "The app runs on Vercel. Durable data (users, revocable sessions, tournaments, favorites, auth rate-limit counters, password-reset tokens) lives in Turso (libSQL). Demo tournaments may remain in the browser (localStorage).",
   "privacy.s3Title": "Cookies and sessions",
   "privacy.s3Body":
-    "We use HttpOnly session cookies (HMAC plus a session id) to keep you signed in. Sessions can be revoked on logout. A favorites cookie helps sync guest favorites. ScoreLive does not set advertising or third-party tracking cookies.",
-  "privacy.s4Title": "Contact",
+    "We use HttpOnly session cookies (HMAC plus a session id) to keep you signed in. Sessions are stored in Turso and can be revoked on logout or after a password reset. A favorites cookie helps sync guest favorites. ScoreLive does not set advertising or third-party tracking cookies.",
+  "privacy.s4Title": "Password reset email",
   "privacy.s4Body":
+    "If you request a password reset and your account has an email, we may send a one-time reset link when Resend is configured (RESEND_API_KEY and a from address). Without that configuration, the reset link is written only to server logs for the operator. Reset tokens are stored hashed, expire after one hour, and are single-use.",
+  "privacy.s5Title": "Contact",
+  "privacy.s5Body":
     "For data questions, open an issue on the public GitHub repository: esmobg/turnyfly.",
 
   "terms.title": "Terms of use",
   "terms.lead":
     "Rules for using ScoreLive as an open tournament platform.",
-  "terms.reviewNote":
-    "This copy is an operator-reviewable draft for the ScoreLive product — not legal advice. Review it before a marketing launch.",
   "terms.s1Title": "The service",
   "terms.s1Body":
-    "ScoreLive lets you register an organizer account, create and share tournaments, and enter scores. The product is open source (MIT). This version has no payments, subscriptions, or OAuth.",
+    "ScoreLive lets you register an organizer account, create and share tournaments, enter scores, and reset a forgotten password with a secure link. The product is open source (MIT). This version has no payments, subscriptions, or OAuth.",
   "terms.s2Title": "Your responsibilities",
   "terms.s2Body":
-    "You are responsible for your password and for the content of tournaments you publish. Do not abuse the API (for example automated login attempts). We may rate-limit requests to reduce abuse.",
+    "You are responsible for your password and for the content of tournaments you publish. Keep recovery email accurate if you rely on password-reset messages. Do not abuse the API (for example automated login or reset attempts). We rate-limit auth requests per IP in Turso to reduce abuse.",
   "terms.s3Title": "Availability and data",
   "terms.s3Body":
     "The service is provided as-is. Outages or data loss can occur even with host-side backups. Keep critical results elsewhere if they matter.",

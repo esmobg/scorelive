@@ -8,9 +8,15 @@ const LOGIN_REGISTER_LIMIT = 10;
  * Durable per-IP token bucket for auth routes (Turso-backed).
  * Shared across Vercel isolates — 10 attempts / minute / IP for login+register.
  */
+export type AuthRateLimitRoute =
+  | "login"
+  | "register"
+  | "forgot"
+  | "reset";
+
 export async function consumeAuthRateLimit(
   request: Request,
-  route: "login" | "register",
+  route: AuthRateLimitRoute,
 ): Promise<{ ok: true } | { ok: false; retryAfterSec: number }> {
   const ip = clientIp(request);
   const minuteBucket = Math.floor(Date.now() / RATE_WINDOW_MS);

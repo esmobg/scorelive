@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Поверителност — ScoreLive",
     description:
-      "Данни за акаунти и турнири, Turso хостинг, бисквитки/сесии. Без плащания и OAuth.",
+      "Акаунти, турнири, сесии, Turso rate limits и опционални имейли за нулиране на парола.",
   },
 };
 

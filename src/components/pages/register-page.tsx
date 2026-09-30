@@ -14,6 +14,8 @@ type RegisterErrorCode =
   | "invalid_password"
   | "password_mismatch"
   | "username_taken"
+  | "invalid_email"
+  | "email_taken"
   | "registration_failed"
   | "rate_limited"
   | "generic";
@@ -23,6 +25,7 @@ export function RegisterPage() {
   const { refresh } = useAuth();
   const formId = useId();
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -38,6 +41,10 @@ export function RegisterPage() {
         return t("register.errorMismatch");
       case "username_taken":
         return t("register.errorTaken");
+      case "invalid_email":
+        return t("register.errorEmail");
+      case "email_taken":
+        return t("register.errorEmailTaken");
       case "registration_failed":
       case "rate_limited":
       case "generic":
@@ -67,6 +74,7 @@ export function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username,
+          email,
           password,
           confirmPassword,
           favorites: loadLocalFavorites(),
@@ -82,6 +90,8 @@ export function RegisterPage() {
           code === "invalid_password" ||
           code === "password_mismatch" ||
           code === "username_taken" ||
+          code === "invalid_email" ||
+          code === "email_taken" ||
           code === "registration_failed" ||
           code === "rate_limited"
         ) {
@@ -132,6 +142,25 @@ export function RegisterPage() {
             className="text-xs text-[var(--tf-ink-muted)]"
           >
             {t("register.usernameHelp")}
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${formId}-email`}>{t("register.email")}</Label>
+          <Input
+            id={`${formId}-email`}
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            aria-describedby={`${formId}-email-help`}
+            className="min-h-11"
+          />
+          <p
+            id={`${formId}-email-help`}
+            className="text-xs text-[var(--tf-ink-muted)]"
+          >
+            {t("register.emailHelp")}
           </p>
         </div>
         <div className="space-y-1.5">

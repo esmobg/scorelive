@@ -29,20 +29,52 @@ export async function findUserById(id: string): Promise<DbUser | null> {
   return rows[0] ?? null;
 }
 
+export async function findUserByEmail(email: string): Promise<DbUser | null> {
+  await ensureSchema();
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  const rows = await getDb()
+    .select()
+    .from(users)
+    .where(eq(users.email, normalized))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 export async function createUser(input: {
   username: string;
   passwordHash: string;
+  email?: string | null;
 }): Promise<DbUser> {
   await ensureSchema();
   const now = new Date().toISOString();
+  const email =
+    typeof input.email === "string" && input.email.trim()
+      ? input.email.trim().toLowerCase()
+      : null;
   const row: DbUser = {
     id: createId("usr"),
     username: input.username.trim().toLowerCase(),
     passwordHash: input.passwordHash,
+    email,
     createdAt: now,
   };
   await getDb().insert(users).values(row);
   return row;
+}
+
+export async function updateUserPasswordHash(
+  username: string,
+  passwordHash: string,
+): Promise<boolean> {
+  await ensureSchema();
+  const result = await getDb()
+    .update(users)
+    .set({ passwordHash })
+    .where(eq(users.username, username.trim().toLowerCase()));
+  return (result.rowsAffected ?? 0) > 0;
 }
 
 export async function usernameExists(username: string): Promise<boolean> {

@@ -39,10 +39,20 @@ CREATE TABLE IF NOT EXISTS auth_rate_limits (
   reset_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id TEXT PRIMARY KEY NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  username TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  used_at TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_tournaments_owner ON tournaments(owner_user_id);
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_sessions_username ON sessions(username);
 CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
+CREATE INDEX IF NOT EXISTS idx_password_reset_username ON password_reset_tokens(username);
+CREATE INDEX IF NOT EXISTS idx_password_reset_expires ON password_reset_tokens(expires_at);
 `;
 
 /**
@@ -77,6 +87,19 @@ export async function ensureSchema(): Promise<void> {
     }
   } catch (error) {
     console.error("[scorelive-migrate-rate-limits]", error);
+  }
+
+  // Add users.email for accounts created before password-reset support.
+  try {
+    const cols = await client.execute(`PRAGMA table_info(users)`);
+    const names = new Set(
+      cols.rows.map((row) => String(row.name ?? row[1] ?? "")),
+    );
+    if (!names.has("email")) {
+      await client.execute(`ALTER TABLE users ADD COLUMN email TEXT`);
+    }
+  } catch (error) {
+    console.error("[scorelive-migrate-users-email]", error);
   }
 
   g.__scoreliveDbMigrated = SCHEMA_GENERATION;

@@ -43,6 +43,7 @@ export async function POST(request: Request) {
     username?: string;
     password?: string;
     confirmPassword?: string;
+    email?: string;
     favorites?: string[];
   };
   try {
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
       password: typeof body.password === "string" ? body.password : "",
       confirmPassword:
         typeof body.confirmPassword === "string" ? body.confirmPassword : "",
+      email: typeof body.email === "string" ? body.email : "",
     });
   } catch (error) {
     console.error("[scorelive-db]", error);

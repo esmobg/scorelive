@@ -1,7 +1,18 @@
 import bcrypt from "bcryptjs";
 import { sealJson, unsealJson } from "@/lib/auth/crypto-seal";
 import { sessionCookieOptions } from "@/lib/auth/session-token";
-import { createUser, findUserByUsername, usernameExists } from "@/lib/db/users";
+import {
+  createUser,
+  findUserByEmail,
+  findUserByUsername,
+  usernameExists,
+} from "@/lib/db/users";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function isValidEmail(value: string): boolean {
+  return EMAIL_RE.test(value.trim());
+}
 
 /** Legacy cookie name — no longer the source of truth (Turso users table is). */
 export const ORGANIZERS_COOKIE = "turnyfly_organizers";
@@ -61,13 +72,16 @@ export type RegisterResult =
         | "invalid_username"
         | "invalid_password"
         | "password_mismatch"
-        | "username_taken";
+        | "username_taken"
+        | "invalid_email"
+        | "email_taken";
     };
 
 export async function registerOrganizer(input: {
   username: string;
   password: string;
   confirmPassword: string;
+  email?: string;
 }): Promise<RegisterResult> {
   const username = input.username.trim();
   if (!USERNAME_RE.test(username)) {
@@ -79,6 +93,16 @@ export async function registerOrganizer(input: {
   if (input.password !== input.confirmPassword) {
     return { ok: false, error: "password_mismatch" };
   }
+
+  const emailRaw = typeof input.email === "string" ? input.email.trim() : "";
+  // Email is optional but required for password-reset email delivery.
+  if (emailRaw && !isValidEmail(emailRaw)) {
+    return { ok: false, error: "invalid_email" };
+  }
+  if (emailRaw && (await findUserByEmail(emailRaw))) {
+    return { ok: false, error: "email_taken" };
+  }
+
   if (
     username.toLowerCase() === DEMO_ADMIN_USERNAME.toLowerCase() ||
     (await usernameExists(username))
@@ -88,7 +112,11 @@ export async function registerOrganizer(input: {
 
   const passwordHash = await bcrypt.hash(input.password, 10);
   try {
-    const user = await createUser({ username, passwordHash });
+    const user = await createUser({
+      username,
+      passwordHash,
+      email: emailRaw || null,
+    });
     return {
       ok: true,
       username: user.username,

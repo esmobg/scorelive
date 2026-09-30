@@ -12,9 +12,6 @@ export function PrivacyPage() {
           {t("privacy.title")}
         </h1>
         <p className="text-lg text-[var(--tf-ink-muted)]">{t("privacy.lead")}</p>
-        <p className="rounded-lg border border-[var(--tf-line)] bg-[var(--tf-mist)]/40 px-4 py-3 text-sm text-[var(--tf-ink-muted)]">
-          {t("privacy.reviewNote")}
-        </p>
       </header>
       <section className="space-y-2">
         <h2 className="text-xl font-semibold text-[var(--tf-ink)]">
@@ -39,6 +36,12 @@ export function PrivacyPage() {
           {t("privacy.s4Title")}
         </h2>
         <p className="leading-relaxed text-[var(--tf-ink)]">{t("privacy.s4Body")}</p>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-xl font-semibold text-[var(--tf-ink)]">
+          {t("privacy.s5Title")}
+        </h2>
+        <p className="leading-relaxed text-[var(--tf-ink)]">{t("privacy.s5Body")}</p>
       </section>
     </article>
   );

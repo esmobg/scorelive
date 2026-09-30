@@ -56,3 +56,21 @@ export async function revokeSession(id: string): Promise<boolean> {
     .where(and(eq(sessions.id, id), isNull(sessions.revokedAt)));
   return (result.rowsAffected ?? 0) > 0;
 }
+
+/** Revoke every active session for a username (e.g. after password reset). */
+export async function revokeSessionsForUsername(
+  username: string,
+): Promise<number> {
+  await ensureSchema();
+  const now = new Date().toISOString();
+  const result = await getDb()
+    .update(sessions)
+    .set({ revokedAt: now })
+    .where(
+      and(
+        eq(sessions.username, username.trim().toLowerCase()),
+        isNull(sessions.revokedAt),
+      ),
+    );
+  return result.rowsAffected ?? 0;
+}

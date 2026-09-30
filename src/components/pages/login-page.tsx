@@ -80,7 +80,15 @@ export function LoginPage() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor={`${formId}-pass`}>{t("login.password")}</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor={`${formId}-pass`}>{t("login.password")}</Label>
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-[var(--tf-accent-deep)] underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--tf-accent)]"
+            >
+              {t("login.forgot")}
+            </Link>
+          </div>
           <Input
             id={`${formId}-pass`}
             name="password"
