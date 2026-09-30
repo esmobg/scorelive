@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "forbidden_origin" }, { status: 403 });
   }
 
-  const limited = consumeAuthRateLimit(request, "login");
+  const limited = await consumeAuthRateLimit(request, "login");
   if (!limited.ok) {
     return NextResponse.json(
       { error: "rate_limited" },

@@ -24,8 +24,14 @@ import {
   newSessionId,
   revokeSession,
 } from "@/lib/db/sessions";
+import { incrementAuthRateLimit } from "@/lib/db/rate-limits";
 import { createEmptyTournament } from "@/lib/tournament";
 import { registerOrganizer, verifyOrganizerCredentials } from "@/lib/auth/organizers";
+import {
+  AUTH_RATE_LIMIT,
+  AUTH_RATE_WINDOW_MS,
+  consumeAuthRateLimit,
+} from "@/lib/auth/request-guards";
 import {
   createSessionToken,
   resolveSession,
@@ -152,5 +158,44 @@ describe("revocable sessions", () => {
     expect(await verifySessionToken(token)).not.toBeNull();
     expect(await isSessionActive(jti)).toBe(false);
     expect(await resolveSession(token)).toBeNull();
+  });
+});
+
+describe("turso auth rate limits", () => {
+  it("increments a durable counter and trips after the limit", async () => {
+    await ensureSchema();
+    const key = `login:203.0.113.9:${Math.floor(Date.now() / AUTH_RATE_WINDOW_MS)}`;
+    for (let i = 1; i <= AUTH_RATE_LIMIT; i += 1) {
+      const result = await incrementAuthRateLimit({
+        key,
+        windowMs: AUTH_RATE_WINDOW_MS,
+      });
+      expect(result.count).toBe(i);
+    }
+    const over = await incrementAuthRateLimit({
+      key,
+      windowMs: AUTH_RATE_WINDOW_MS,
+    });
+    expect(over.count).toBe(AUTH_RATE_LIMIT + 1);
+  });
+
+  it("returns rate_limited via consumeAuthRateLimit after 10 attempts", async () => {
+    await ensureSchema();
+    const request = new Request("http://localhost/api/auth/login", {
+      method: "POST",
+      headers: {
+        "x-forwarded-for": "198.51.100.44",
+        host: "localhost",
+      },
+    });
+    for (let i = 0; i < AUTH_RATE_LIMIT; i += 1) {
+      const ok = await consumeAuthRateLimit(request, "login");
+      expect(ok.ok).toBe(true);
+    }
+    const limited = await consumeAuthRateLimit(request, "login");
+    expect(limited.ok).toBe(false);
+    if (!limited.ok) {
+      expect(limited.retryAfterSec).toBeGreaterThanOrEqual(1);
+    }
   });
 });

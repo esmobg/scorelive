@@ -1,37 +1,40 @@
 import { isProductionRuntime } from "@/lib/auth/crypto-seal";
+import { incrementAuthRateLimit } from "@/lib/db/rate-limits";
 
 const RATE_WINDOW_MS = 60_000;
 const LOGIN_REGISTER_LIMIT = 10;
 
-type Bucket = { count: number; resetAt: number };
-
-const rateBuckets = new Map<string, Bucket>();
-
 /**
- * In-memory per-IP token bucket for auth routes.
- * Limitation: counters are per serverless isolate / process — not global across
- * Vercel instances. Prefer Upstash / WAF when available.
+ * Durable per-IP token bucket for auth routes (Turso-backed).
+ * Shared across Vercel isolates — 10 attempts / minute / IP for login+register.
  */
-export function consumeAuthRateLimit(
+export async function consumeAuthRateLimit(
   request: Request,
   route: "login" | "register",
-): { ok: true } | { ok: false; retryAfterSec: number } {
+): Promise<{ ok: true } | { ok: false; retryAfterSec: number }> {
   const ip = clientIp(request);
-  const key = `${route}:${ip}`;
+  const minuteBucket = Math.floor(Date.now() / RATE_WINDOW_MS);
+  const key = `${route}:${ip}:${minuteBucket}`;
   const now = Date.now();
-  let bucket = rateBuckets.get(key);
-  if (!bucket || bucket.resetAt <= now) {
-    bucket = { count: 0, resetAt: now + RATE_WINDOW_MS };
-    rateBuckets.set(key, bucket);
+
+  try {
+    const { count, resetAt } = await incrementAuthRateLimit({
+      key,
+      windowMs: RATE_WINDOW_MS,
+      now,
+    });
+    if (count > LOGIN_REGISTER_LIMIT) {
+      return {
+        ok: false,
+        retryAfterSec: Math.max(1, Math.ceil((resetAt - now) / 1000)),
+      };
+    }
+    return { ok: true };
+  } catch (error) {
+    console.error("[scorelive-rate-limit]", error);
+    // Fail open on DB outage so login is not hard-down; origin checks still apply.
+    return { ok: true };
   }
-  bucket.count += 1;
-  if (bucket.count > LOGIN_REGISTER_LIMIT) {
-    return {
-      ok: false,
-      retryAfterSec: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)),
-    };
-  }
-  return { ok: true };
 }
 
 function clientIp(request: Request): string {
