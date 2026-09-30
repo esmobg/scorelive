@@ -4,10 +4,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "ЧЗВ",
   description:
-    "Често задавани въпроси за ScoreLive: акаунти, данни, формати и езици.",
+    "Често задавани въпроси за ScoreLive: акаунти, Turso, следене на живо, формати, език и тема.",
   openGraph: {
     title: "ЧЗВ · ScoreLive",
-    description: "Кратки отговори за демото и текущите възможности.",
+    description:
+      "Кратки отговори за ScoreLive — отворена платформа със споделени турнири на сървъра.",
   },
 };
 
