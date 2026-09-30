@@ -152,6 +152,9 @@ export const en = {
   "public.standingsHeading": "Standings",
   "public.matchesHeading": "Matches",
   "public.shareHeading": "Share",
+  "public.live": "Live",
+  "public.liveHint": "Scores refresh automatically while this tab is open.",
+  "public.liveUpdated": "Scores and standings updated.",
 
   "share.label": "Share this tournament",
   "share.native": "Share",
@@ -230,22 +233,26 @@ export const en = {
   "how.cta": "Organize now",
 
   "faq.title": "Frequently asked questions",
-  "faq.lead": "Short answers about the demo and current capabilities.",
+  "faq.lead":
+    "Short answers about ScoreLive — an open platform with shared server-backed tournaments.",
   "faq.q1": "Do I need an account to follow a tournament?",
   "faq.a1":
-    "No. Public pages, discovery, and favorites are open. An admin account is only required to organize and enter scores.",
+    "No. Public live pages and discovery are open to everyone. An account is only required to organize tournaments and enter scores.",
   "faq.q2": "Where is data stored?",
   "faq.a2":
-    "Demo tournaments stay local. Tournaments owned by registered organizers are stored in Turso (libSQL). Logged-in favorites sync to the database.",
-  "faq.q3": "What are League and Swiss formats?",
+    "Organizer tournaments are stored in Turso (libSQL). Demo seeds may stay local in the browser. Favorites sync to the database when you are logged in.",
+  "faq.q3": "How does live follow work?",
   "faq.a3":
-    "League: round-robin (3/1/0). Swiss: several rounds paired by points, no rematches, Buchholz tie-break.",
-  "faq.q4": "Are there payments or OAuth?",
+    "Open the public tournament link. While the tab is visible, scores and standings refresh automatically every few seconds — no reload needed.",
+  "faq.q4": "What are League and Swiss formats?",
   "faq.a4":
-    "Not in this version. No payments, email password reset, or external identity providers.",
-  "faq.q5": "How do I change language?",
+    "League: round-robin, everyone plays everyone, points 3/1/0. Swiss: several rounds paired by points, no rematches, Buchholz tie-break.",
+  "faq.q5": "Are there payments or OAuth?",
   "faq.a5":
-    "Use the BG/EN toggle in the header. The page lang attribute updates automatically.",
+    "Not in this version. No payments, email password reset, or external identity providers.",
+  "faq.q6": "How do I change language or theme?",
+  "faq.a6":
+    "Use the BG/EN and light/dark toggles in the header. The page lang attribute follows the selected language.",
 
   "standings.empty": "No standings yet.",
   "standings.colRank": "#",

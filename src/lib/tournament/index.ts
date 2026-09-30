@@ -49,3 +49,7 @@ export {
   removeTeam,
   setMatchScore,
 } from "./fixtures";
+export {
+  LIVE_POLL_MS,
+  tournamentLiveFingerprint,
+} from "./live-follow";

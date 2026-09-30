@@ -165,6 +165,38 @@ test.describe("ScoreLive smoke", () => {
     await expect(
       page.getByRole("heading", { name: "Често задавани въпроси" }),
     ).toBeVisible();
+    await expect(
+      page.getByText("Къде се пазят данните?"),
+    ).toBeVisible();
+    await expect(
+      page.getByText("Как работи следенето на живо?"),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/демото и текущите възможности/),
+    ).toHaveCount(0);
+  });
+
+  test("public tournament shows live indicator and polls API", async ({
+    page,
+  }) => {
+    let pollCount = 0;
+    await page.route("**/api/tournaments/demo-volleyball", async (route) => {
+      if (route.request().method() === "GET") {
+        pollCount += 1;
+      }
+      await route.continue();
+    });
+
+    await page.goto("/tournaments/demo-volleyball");
+    await expect(
+      page.getByRole("heading", { name: "Пролетна купа София" }),
+    ).toBeVisible();
+    await expect(page.getByTestId("live-indicator")).toBeVisible();
+    await expect(page.getByTestId("live-indicator")).toHaveText("На живо");
+
+    await expect
+      .poll(() => pollCount, { timeout: 12000 })
+      .toBeGreaterThanOrEqual(1);
   });
 
   test("favorite toggle adds tournament to favorites page", async ({ page }) => {

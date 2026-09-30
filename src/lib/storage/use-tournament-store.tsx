@@ -106,6 +106,7 @@ interface TournamentStoreValue {
   reset: () => void;
   getById: (id: string) => Tournament | undefined;
   refresh: () => Promise<void>;
+  refreshTournament: (id: string) => Promise<Tournament | null>;
 }
 
 const TournamentStoreContext = createContext<TournamentStoreValue | null>(
@@ -123,6 +124,19 @@ async function fetchServerTournaments(): Promise<Tournament[]> {
   }
 }
 
+async function fetchServerTournament(id: string): Promise<Tournament | null> {
+  try {
+    const res = await fetch(`/api/tournaments/${encodeURIComponent(id)}`, {
+      credentials: "include",
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { tournament?: Tournament };
+    return data.tournament ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function TournamentStoreProvider({ children }: { children: ReactNode }) {
   const tournaments = useSyncExternalStore(
     subscribe,
@@ -136,6 +150,26 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
     const server = await fetchServerTournaments();
     const merged = mergeServerAndLocal(local, server);
     setCache(merged);
+  }, []);
+
+  const refreshTournament = useCallback(async (id: string) => {
+    const remote = await fetchServerTournament(id);
+    if (!remote) return null;
+    const current = readStore();
+    const existing = current.find((item) => item.id === id);
+    if (
+      existing &&
+      existing.updatedAt === remote.updatedAt &&
+      JSON.stringify(existing.matches) === JSON.stringify(remote.matches)
+    ) {
+      return existing;
+    }
+    const without = current.filter((item) => item.id !== id);
+    const next = [remote, ...without].sort((a, b) =>
+      b.updatedAt.localeCompare(a.updatedAt),
+    );
+    setCache(next);
+    return remote;
   }, []);
 
   useEffect(() => {
@@ -233,8 +267,26 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ tournaments, ready, save, remove, reset, getById, refresh }),
-    [tournaments, ready, save, remove, reset, getById, refresh],
+    () => ({
+      tournaments,
+      ready,
+      save,
+      remove,
+      reset,
+      getById,
+      refresh,
+      refreshTournament,
+    }),
+    [
+      tournaments,
+      ready,
+      save,
+      remove,
+      reset,
+      getById,
+      refresh,
+      refreshTournament,
+    ],
   );
 
   return (
