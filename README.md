@@ -2,7 +2,7 @@
 
 Open-source tournament platform for organizers, players, and fans. Create group stages, knockout brackets, league tables, or Swiss-system events, enter scores, and follow live standings — sport-agnostic, bilingual (BG/EN), WCAG 2.2 AAA-minded.
 
-**Live demo:** [https://scorelive-app.vercel.app](https://scorelive-app.vercel.app) · **Repo:** [esmobg/turnyfly](https://github.com/esmobg/turnyfly)
+**Live demo:** [https://scorelive-app.vercel.app](https://scorelive-app.vercel.app) · **Repo:** [esmobg/scorelive](https://github.com/esmobg/scorelive)
 
 ## Stack
 

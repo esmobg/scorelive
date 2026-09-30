@@ -391,7 +391,7 @@ export const en = {
     "If you request a password reset and your account has an email on file, ScoreLive can send a one-time reset link by email when email delivery is configured. Until then, reset links are available only to the site operator via server logs. Reset tokens are stored hashed, expire after one hour, and are single-use. Username-only accounts cannot receive email recovery.",
   "privacy.s5Title": "Contact",
   "privacy.s5Body":
-    "For privacy questions or data requests, open a GitHub issue: https://github.com/esmobg/turnyfly/issues",
+    "For privacy questions or data requests, open a GitHub issue: https://github.com/esmobg/scorelive/issues",
 
   "terms.title": "Terms of use",
   "terms.lead":
@@ -407,5 +407,5 @@ export const en = {
     "The service is provided as-is. Outages or data loss can occur even with host-side backups. Keep critical results elsewhere if they matter.",
   "terms.s4Title": "Contact",
   "terms.s4Body":
-    "Feedback and bug reports: https://github.com/esmobg/turnyfly/issues",
+    "Feedback and bug reports: https://github.com/esmobg/scorelive/issues",
 } as const satisfies Messages;
