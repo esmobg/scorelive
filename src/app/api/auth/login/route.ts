@@ -55,7 +55,16 @@ export async function POST(request: Request) {
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
 
-  const ok = await verifyLoginCredentials(username, password);
+  let ok = false;
+  try {
+    ok = await verifyLoginCredentials(username, password);
+  } catch (error) {
+    console.error("[scorelive-db]", error);
+    return NextResponse.json(
+      { error: "database_unavailable" },
+      { status: 503 },
+    );
+  }
   if (!ok) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }

@@ -51,12 +51,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   }
 
-  const result = await registerOrganizer({
-    username: typeof body.username === "string" ? body.username : "",
-    password: typeof body.password === "string" ? body.password : "",
-    confirmPassword:
-      typeof body.confirmPassword === "string" ? body.confirmPassword : "",
-  });
+  let result;
+  try {
+    result = await registerOrganizer({
+      username: typeof body.username === "string" ? body.username : "",
+      password: typeof body.password === "string" ? body.password : "",
+      confirmPassword:
+        typeof body.confirmPassword === "string" ? body.confirmPassword : "",
+    });
+  } catch (error) {
+    console.error("[scorelive-db]", error);
+    return NextResponse.json(
+      { error: "database_unavailable" },
+      { status: 503 },
+    );
+  }
 
   if (!result.ok) {
     if (result.error === "username_taken" && isProductionRuntime()) {

@@ -7,15 +7,20 @@ import {
   listStoredTournaments,
 } from "@/lib/db/tournaments";
 import { ensureUserRow, findUserByUsername } from "@/lib/db/users";
+import { withDbFallback } from "@/lib/db/safe";
 import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
 import { DEMO_ADMIN_USERNAME } from "@/lib/auth/session";
+import { isRemoteTursoConfigured } from "@/lib/db/client";
 import { createId } from "@/lib/tournament/id";
 import type { Tournament } from "@/lib/tournament/types";
 
 export async function GET() {
-  const rows = await listStoredTournaments();
+  const rows = await withDbFallback(() => listStoredTournaments(), []);
   const tournaments = rows.map((r) => r.tournament);
-  return NextResponse.json({ tournaments });
+  return NextResponse.json({
+    tournaments,
+    ...(isRemoteTursoConfigured() ? {} : { db: "local_or_unavailable" }),
+  });
 }
 
 export async function POST(request: Request) {
@@ -28,13 +33,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  let user = await findUserByUsername(session.username);
-  if (
-    !user &&
-    isDemoAdminEnabled() &&
-    session.username === DEMO_ADMIN_USERNAME
-  ) {
-    user = await ensureUserRow(session.username);
+  let user;
+  try {
+    user = await findUserByUsername(session.username);
+    if (
+      !user &&
+      isDemoAdminEnabled() &&
+      session.username === DEMO_ADMIN_USERNAME
+    ) {
+      user = await ensureUserRow(session.username);
+    }
+  } catch (error) {
+    console.error("[scorelive-db]", error);
+    return NextResponse.json(
+      { error: "database_unavailable" },
+      { status: 503 },
+    );
   }
   if (!user) {
     return NextResponse.json(
@@ -66,11 +80,18 @@ export async function POST(request: Request) {
     ownerUsername: user.username,
   };
 
-  const saved = await insertTournament({
-    id,
-    ownerUserId: user.id,
-    tournament,
-  });
-
-  return NextResponse.json({ tournament: saved }, { status: 201 });
+  try {
+    const saved = await insertTournament({
+      id,
+      ownerUserId: user.id,
+      tournament,
+    });
+    return NextResponse.json({ tournament: saved }, { status: 201 });
+  } catch (error) {
+    console.error("[scorelive-db]", error);
+    return NextResponse.json(
+      { error: "database_unavailable" },
+      { status: 503 },
+    );
+  }
 }
