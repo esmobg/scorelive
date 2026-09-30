@@ -11,7 +11,10 @@ const LOGIN_REGISTER_LIMIT = 10;
 export async function consumeAuthRateLimit(
   request: Request,
   route: "login" | "register",
-): Promise<{ ok: true } | { ok: false; retryAfterSec: number }> {
+): Promise<
+  | { ok: true; count: number; ip: string }
+  | { ok: false; retryAfterSec: number; count: number; ip: string }
+> {
   const ip = clientIp(request);
   const minuteBucket = Math.floor(Date.now() / RATE_WINDOW_MS);
   const key = `${route}:${ip}:${minuteBucket}`;
@@ -27,13 +30,15 @@ export async function consumeAuthRateLimit(
       return {
         ok: false,
         retryAfterSec: Math.max(1, Math.ceil((resetAt - now) / 1000)),
+        count,
+        ip,
       };
     }
-    return { ok: true };
+    return { ok: true, count, ip };
   } catch (error) {
     console.error("[scorelive-rate-limit]", error);
     // Fail open only on unexpected DB errors so auth stays available.
-    return { ok: true };
+    return { ok: true, count: 0, ip };
   }
 }
 
