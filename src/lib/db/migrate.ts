@@ -1,7 +1,7 @@
-import { getLibsqlClient } from "@/lib/db/client";
+import { getLibsqlClient, SCHEMA_GENERATION } from "@/lib/db/client";
 
 type GlobalDb = {
-  __scoreliveDbMigrated?: boolean;
+  __scoreliveDbMigrated?: number;
 };
 
 const MIGRATION_SQL = `
@@ -51,7 +51,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at);
  */
 export async function ensureSchema(): Promise<void> {
   const g = globalThis as typeof globalThis & GlobalDb;
-  if (g.__scoreliveDbMigrated) {
+  if (g.__scoreliveDbMigrated === SCHEMA_GENERATION) {
     return;
   }
 
@@ -64,5 +64,5 @@ export async function ensureSchema(): Promise<void> {
     await client.execute(sql);
   }
 
-  g.__scoreliveDbMigrated = true;
+  g.__scoreliveDbMigrated = SCHEMA_GENERATION;
 }

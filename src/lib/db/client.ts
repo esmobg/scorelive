@@ -8,7 +8,8 @@ export type AppDatabase = LibSQLDatabase<typeof schema>;
 type GlobalDb = {
   __scoreliveLibsql?: Client;
   __scoreliveDb?: AppDatabase;
-  __scoreliveDbMigrated?: boolean;
+  /** Schema migration generation — bump when MIGRATION_SQL gains tables. */
+  __scoreliveDbMigrated?: number;
 };
 
 function resolveDatabaseUrl(): string {
@@ -55,3 +56,5 @@ export function resetDbClientsForTests(): void {
   delete g.__scoreliveDb;
   delete g.__scoreliveDbMigrated;
 }
+
+export const SCHEMA_GENERATION = 2;

@@ -1,10 +1,8 @@
-import { eq } from "drizzle-orm";
-import { getDb } from "@/lib/db/client";
+import { getLibsqlClient } from "@/lib/db/client";
 import { ensureSchema } from "@/lib/db/migrate";
-import { authRateLimits } from "@/lib/db/schema";
 
 /**
- * Atomically increment a durable IP/minute counter.
+ * Atomically increment a durable IP/minute counter via libSQL upsert.
  * Returns the new count and when the window resets.
  */
 export async function incrementAuthRateLimit(input: {
@@ -13,38 +11,37 @@ export async function incrementAuthRateLimit(input: {
   now?: number;
 }): Promise<{ count: number; resetAt: number }> {
   await ensureSchema();
+  const client = getLibsqlClient();
   const now = input.now ?? Date.now();
-  const db = getDb();
-  const existing = await db
-    .select()
-    .from(authRateLimits)
-    .where(eq(authRateLimits.key, input.key))
-    .limit(1);
+  const nowIso = new Date(now).toISOString();
+  const resetAt = now + input.windowMs;
+  const resetIso = new Date(resetAt).toISOString();
 
-  const row = existing[0];
-  if (!row || Date.parse(row.resetAt) <= now) {
-    const resetAt = now + input.windowMs;
-    await db
-      .insert(authRateLimits)
-      .values({
-        key: input.key,
-        count: 1,
-        resetAt: new Date(resetAt).toISOString(),
-      })
-      .onConflictDoUpdate({
-        target: authRateLimits.key,
-        set: {
-          count: 1,
-          resetAt: new Date(resetAt).toISOString(),
-        },
-      });
-    return { count: 1, resetAt };
+  await client.execute({
+    sql: `INSERT INTO auth_rate_limits (key, count, reset_at)
+          VALUES (?, 1, ?)
+          ON CONFLICT(key) DO UPDATE SET
+            count = CASE
+              WHEN auth_rate_limits.reset_at <= ? THEN 1
+              ELSE auth_rate_limits.count + 1
+            END,
+            reset_at = CASE
+              WHEN auth_rate_limits.reset_at <= ? THEN excluded.reset_at
+              ELSE auth_rate_limits.reset_at
+            END`,
+    args: [input.key, resetIso, nowIso, nowIso],
+  });
+
+  const row = await client.execute({
+    sql: `SELECT count, reset_at FROM auth_rate_limits WHERE key = ? LIMIT 1`,
+    args: [input.key],
+  });
+  const selected = row.rows[0];
+  if (!selected) {
+    throw new Error("auth_rate_limits upsert did not persist a row");
   }
-
-  const nextCount = row.count + 1;
-  await db
-    .update(authRateLimits)
-    .set({ count: nextCount })
-    .where(eq(authRateLimits.key, input.key));
-  return { count: nextCount, resetAt: Date.parse(row.resetAt) };
+  return {
+    count: Number(selected.count),
+    resetAt: Date.parse(String(selected.reset_at)),
+  };
 }

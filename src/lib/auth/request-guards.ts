@@ -32,7 +32,7 @@ export async function consumeAuthRateLimit(
     return { ok: true };
   } catch (error) {
     console.error("[scorelive-rate-limit]", error);
-    // Fail open on DB outage so login is not hard-down; origin checks still apply.
+    // Fail open only on unexpected DB errors so auth stays available.
     return { ok: true };
   }
 }
