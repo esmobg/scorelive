@@ -1,4 +1,4 @@
-import { primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, primaryKey, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -28,5 +28,21 @@ export const favorites = sqliteTable(
   (table) => [primaryKey({ columns: [table.userId, table.tournamentId] })],
 );
 
+/** Revocable auth sessions — id is the JWT-style jti embedded in the HMAC cookie. */
+export const sessions = sqliteTable("sessions", {
+  id: text("id").primaryKey(),
+  username: text("username").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  revokedAt: text("revoked_at"),
+});
+
+/** Durable IP/minute auth rate-limit counters (shared across Vercel isolates). */
+export const authRateLimits = sqliteTable("auth_rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  resetAt: text("reset_at").notNull(),
+});
+
 export type DbUser = typeof users.$inferSelect;
 export type DbTournament = typeof tournaments.$inferSelect;
+export type DbSession = typeof sessions.$inferSelect;

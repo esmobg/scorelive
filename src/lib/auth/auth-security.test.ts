@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
+import {
+  hmacSignBase64Url,
+  toBase64Url,
+} from "@/lib/auth/crypto-seal";
 import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
 import {
   sealOrganizersCookie,
@@ -83,12 +87,24 @@ describe("sealed organizers cookie", () => {
 });
 
 describe("session tokens", () => {
-  it("mints and verifies with configured secret", async () => {
+  it("mints and verifies with configured secret and jti", async () => {
     process.env.TURNYFLY_SESSION_SECRET =
       "unit-test-session-secret-32chars-min!!";
-    const token = await createSessionToken("admin");
+    const token = await createSessionToken("admin", "ses_testjti01");
     const payload = await verifySessionToken(token);
     expect(payload?.username).toBe("admin");
+    expect(payload?.jti).toBe("ses_testjti01");
+  });
+
+  it("rejects tokens missing jti", async () => {
+    process.env.TURNYFLY_SESSION_SECRET =
+      "unit-test-session-secret-32chars-min!!";
+    const body = toBase64Url(
+      JSON.stringify({ username: "admin", exp: Date.now() + 60_000 }),
+    );
+    const signature = await hmacSignBase64Url(body);
+    const forged = `${body}.${signature}`;
+    expect(await verifySessionToken(forged)).toBeNull();
   });
 });
 

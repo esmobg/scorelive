@@ -18,14 +18,29 @@ import {
   listFavoriteIds,
   replaceFavoriteIds,
 } from "@/lib/db/favorites";
+import {
+  insertSession,
+  isSessionActive,
+  newSessionId,
+  revokeSession,
+} from "@/lib/db/sessions";
 import { createEmptyTournament } from "@/lib/tournament";
 import { registerOrganizer, verifyOrganizerCredentials } from "@/lib/auth/organizers";
+import {
+  createSessionToken,
+  resolveSession,
+  mintSession,
+  verifySessionToken,
+} from "@/lib/auth/session";
 
 const dbPath = path.join(process.cwd(), ".data", "scorelive-test.db");
+const PREV_SECRET = process.env.TURNYFLY_SESSION_SECRET;
 
 beforeEach(() => {
   process.env.TURSO_DATABASE_URL = `file:${dbPath}`;
   delete process.env.TURSO_AUTH_TOKEN;
+  process.env.TURNYFLY_SESSION_SECRET =
+    "unit-test-session-secret-32chars-min!!";
   resetDbClientsForTests();
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
   if (fs.existsSync(dbPath)) {
@@ -37,6 +52,11 @@ afterEach(() => {
   resetDbClientsForTests();
   if (fs.existsSync(dbPath)) {
     fs.unlinkSync(dbPath);
+  }
+  if (PREV_SECRET === undefined) {
+    delete process.env.TURNYFLY_SESSION_SECRET;
+  } else {
+    process.env.TURNYFLY_SESSION_SECRET = PREV_SECRET;
   }
 });
 
@@ -92,5 +112,45 @@ describe("turso users auth", () => {
     await deleteStoredTournament(tournament.id);
     expect(await getStoredTournament(tournament.id)).toBeNull();
     expect(await findUserByUsername("bob")).not.toBeNull();
+  });
+});
+
+describe("revocable sessions", () => {
+  it("mints a live session and rejects after revoke", async () => {
+    await ensureSchema();
+    const token = await mintSession("carol");
+    const cryptoOk = await verifySessionToken(token);
+    expect(cryptoOk?.username).toBe("carol");
+    expect(cryptoOk?.jti).toBeTruthy();
+
+    const live = await resolveSession(token);
+    expect(live?.jti).toBe(cryptoOk?.jti);
+
+    await revokeSession(cryptoOk!.jti);
+    expect(await isSessionActive(cryptoOk!.jti)).toBe(false);
+    expect(await resolveSession(token)).toBeNull();
+  });
+
+  it("rejects forged or missing jti even with valid HMAC shape", async () => {
+    await ensureSchema();
+    const token = await createSessionToken("dave", "ses_does_not_exist");
+    const cryptoOk = await verifySessionToken(token);
+    expect(cryptoOk?.username).toBe("dave");
+    expect(await resolveSession(token)).toBeNull();
+  });
+
+  it("rejects expired session rows", async () => {
+    await ensureSchema();
+    const jti = newSessionId();
+    await insertSession({
+      id: jti,
+      username: "erin",
+      expiresAt: new Date(Date.now() - 1000),
+    });
+    const token = await createSessionToken("erin", jti);
+    // Token exp is still in the future; row expiry must still fail.
+    expect(await verifySessionToken(token)).not.toBeNull();
+    expect(await isSessionActive(jti)).toBe(false);
+    expect(await resolveSession(token)).toBeNull();
   });
 });

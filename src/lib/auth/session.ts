@@ -2,9 +2,17 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
 import { verifyOrganizerCredentials } from "@/lib/auth/organizers";
+import {
+  insertSession,
+  isSessionActive,
+  newSessionId,
+  revokeSession,
+} from "@/lib/db/sessions";
 import { findUserByUsername } from "@/lib/db/users";
 import {
   SESSION_COOKIE,
+  SESSION_TTL_MS,
+  createSessionToken,
   verifySessionToken,
   type SessionPayload,
 } from "@/lib/auth/session-token";
@@ -56,9 +64,49 @@ export async function verifyLoginCredentials(
   return verifyOrganizerCredentials(username, password);
 }
 
+/**
+ * Insert a sessions row and mint an HMAC cookie that embeds its jti.
+ */
+export async function mintSession(username: string): Promise<string> {
+  const jti = newSessionId();
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
+  await insertSession({
+    id: jti,
+    username: username.trim().toLowerCase(),
+    expiresAt,
+  });
+  return createSessionToken(username.trim().toLowerCase(), jti);
+}
+
+/**
+ * HMAC + Turso revoke check. Tokens without an active sessions row are rejected.
+ */
+export async function resolveSession(
+  token: string | undefined,
+): Promise<SessionPayload | null> {
+  const payload = await verifySessionToken(token);
+  if (!payload) {
+    return null;
+  }
+  if (!(await isSessionActive(payload.jti))) {
+    return null;
+  }
+  return payload;
+}
+
 export async function getSession(): Promise<SessionPayload | null> {
   const jar = await cookies();
-  return verifySessionToken(jar.get(SESSION_COOKIE)?.value);
+  return resolveSession(jar.get(SESSION_COOKIE)?.value);
+}
+
+/** Revoke the current cookie's session row (no-op if missing/already revoked). */
+export async function revokeCurrentSession(): Promise<void> {
+  const jar = await cookies();
+  const payload = await verifySessionToken(jar.get(SESSION_COOKIE)?.value);
+  if (!payload) {
+    return;
+  }
+  await revokeSession(payload.jti);
 }
 
 /** Resolve DB user id for the current session username (null for demo admin). */

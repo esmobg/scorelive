@@ -18,20 +18,30 @@ export const MAX_FAVORITE_ID_LENGTH = 64;
 export interface SessionPayload {
   username: string;
   exp: number;
+  /** Session row id — required for revoke. */
+  jti: string;
 }
 
-export async function createSessionToken(username: string): Promise<string> {
+export async function createSessionToken(
+  username: string,
+  jti: string,
+): Promise<string> {
   // Touch secret early so production misconfig fails closed on mint.
   getSessionSecret();
   const payload: SessionPayload = {
     username,
     exp: Date.now() + SESSION_TTL_MS,
+    jti,
   };
   const body = toBase64Url(JSON.stringify(payload));
   const signature = await hmacSignBase64Url(body);
   return `${body}.${signature}`;
 }
 
+/**
+ * Cryptographic verify only (HMAC + shape + exp).
+ * Callers that need revoke semantics must also check the sessions table.
+ */
 export async function verifySessionToken(
   token: string | undefined,
 ): Promise<SessionPayload | null> {
@@ -49,15 +59,21 @@ export async function verifySessionToken(
       return null;
     }
     const json = new TextDecoder().decode(fromBase64Url(body));
-    const payload = JSON.parse(json) as SessionPayload;
+    const payload = JSON.parse(json) as Partial<SessionPayload>;
     if (
       typeof payload.username !== "string" ||
       typeof payload.exp !== "number" ||
+      typeof payload.jti !== "string" ||
+      !payload.jti ||
       payload.exp < Date.now()
     ) {
       return null;
     }
-    return payload;
+    return {
+      username: payload.username,
+      exp: payload.exp,
+      jti: payload.jti,
+    };
   } catch {
     return null;
   }

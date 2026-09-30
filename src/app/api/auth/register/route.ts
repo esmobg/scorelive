@@ -6,8 +6,8 @@ import {
   consumeAuthRateLimit,
 } from "@/lib/auth/request-guards";
 import {
-  createSessionToken,
   FAVORITES_COOKIE,
+  mintSession,
   normalizeFavoriteIds,
   parseFavoriteIds,
   SESSION_COOKIE,
@@ -78,7 +78,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status });
   }
 
-  const token = await createSessionToken(result.username);
+  let token: string;
+  try {
+    token = await mintSession(result.username);
+  } catch (error) {
+    console.error("[scorelive-db]", error);
+    return NextResponse.json(
+      { error: "database_unavailable" },
+      { status: 503 },
+    );
+  }
   const response = NextResponse.json({ ok: true, username: result.username });
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
 
