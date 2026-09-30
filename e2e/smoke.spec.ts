@@ -176,6 +176,19 @@ test.describe("ScoreLive smoke", () => {
     ).toHaveCount(0);
   });
 
+  test("home page includes FAQ section with shared questions", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const faq = page.locator("#faq");
+    await expect(faq).toBeVisible();
+    await expect(
+      faq.getByRole("heading", { name: "Често задавани въпроси" }),
+    ).toBeVisible();
+    await expect(faq.getByText("Къде се пазят данните?")).toBeVisible();
+    await expect(faq.getByText("Как работи следенето на живо?")).toBeVisible();
+  });
+
   test("public tournament shows live indicator and polls API", async ({
     page,
   }) => {

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { BrandMark } from "@/components/brand/brand-mark";
+import { FaqList } from "@/components/faq/faq-list";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
 import { TournamentCard } from "@/components/tournament/tournament-card";
 import { Button } from "@/components/ui/button";
@@ -146,6 +147,23 @@ export function DiscoverHome() {
             {t("home.howCta")}
           </Link>
         </p>
+      </section>
+
+      <section
+        id="faq"
+        className="mx-auto w-full max-w-3xl px-4 sm:px-6"
+        aria-labelledby="faq-heading"
+      >
+        <div className="mb-8 max-w-2xl space-y-2">
+          <h2
+            id="faq-heading"
+            className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[var(--tf-ink)]"
+          >
+            {t("faq.title")}
+          </h2>
+          <p className="text-[var(--tf-ink-muted)]">{t("faq.lead")}</p>
+        </div>
+        <FaqList />
       </section>
 
       <section

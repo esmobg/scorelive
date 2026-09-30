@@ -272,7 +272,7 @@ export function SiteFooter() {
   const footerLinks = [
     { href: "/about", label: t("nav.about") },
     { href: "/how-it-works", label: t("nav.howItWorks") },
-    { href: "/faq", label: t("nav.faq") },
+    { href: "/#faq", label: t("nav.faq") },
     { href: "/accessibility", label: t("nav.accessibility") },
   ] as const;
 
