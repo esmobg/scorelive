@@ -274,6 +274,8 @@ export function SiteFooter() {
     { href: "/how-it-works", label: t("nav.howItWorks") },
     { href: "/#faq", label: t("nav.faq") },
     { href: "/accessibility", label: t("nav.accessibility") },
+    { href: "/privacy", label: t("nav.privacy") },
+    { href: "/terms", label: t("nav.terms") },
   ] as const;
 
   return (

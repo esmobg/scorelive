@@ -83,15 +83,43 @@ Built-in demo admin is **enabled in local development** and **disabled on produc
 ## Features in this slice
 
 - Discover home with demo tournaments + how-it-works / CTA sections
-- Content pages: About, How it works, FAQ
-- Organizer flow: register/login (Turso users), create tournament (DB), add teams, generate fixtures, enter scores
-- Owner ACL on tournament PATCH/DELETE APIs
+- Content pages: About, How it works, FAQ, Privacy, Terms
+- Organizer flow: register/login (Turso users + revocable sessions), create tournament (DB), add teams, generate fixtures, enter scores
+- Owner ACL on tournament PATCH/DELETE APIs (scores only via owner PATCH)
+- Durable auth rate limits + `GET /api/health`
 - Formats: groups, knockout, groups → knockout, league, **Swiss** (pairing by points, no rematches, bye, Buchholz)
 - Favorites for logged-in users in Turso; guests keep localStorage + cookie sync
 - Dark / light theme toggle (localStorage + `prefers-color-scheme`)
 - Social footer + share controls + Open Graph / Twitter meta
 - Security headers (CSP, frame denial, nosniff, referrer, permissions)
 - Mobile-friendly header, scrollable tables, AAA contrast tokens in both themes
+
+## Ops checklist (production)
+
+| Item | Where |
+| --- | --- |
+| App + DB health | `GET /api/health` → `{ ok, db: "turso"\|"local"\|"down" }` |
+| Request / error logs | Vercel project `scorelive` → Logs |
+| Database console | [Turso dashboard](https://turso.tech) for the `scorelive` DB |
+| Session revoke | Logout clears cookie **and** marks the `sessions` row revoked |
+| Auth abuse | Turso `auth_rate_limits` — 10 login/register attempts per IP per minute |
+
+### Env checklist (Vercel Production)
+
+- `TURNYFLY_SESSION_SECRET` (min 32 chars; fail-closed)
+- `TURSO_DATABASE_URL` (`libsql://…`)
+- `TURSO_AUTH_TOKEN`
+- `NEXT_PUBLIC_SITE_URL` (`https://scorelive-app.vercel.app`)
+- `DEMO_ADMIN_ENABLED` unset / `false`
+
+### Backup / restore (Turso)
+
+1. In Turso dashboard or CLI, create a dump/snapshot of the production DB (`turso db shell scorelive .dump > scorelive-backup.sql` or platform dump).
+2. Store the dump outside the app (encrypted object storage / secure disk).
+3. To restore: create a new DB (or wipe), apply the dump, then point `TURSO_DATABASE_URL` / token at the restored DB and redeploy if the URL changed.
+4. After restore, smoke-check `/api/health`, register/login, and an owned tournament PATCH.
+
+Schema auto-migrates on first API use (`ensureSchema`) for new tables (`sessions`, `auth_rate_limits`).
 
 ## Out of scope
 

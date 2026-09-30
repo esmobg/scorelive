@@ -22,6 +22,8 @@ export const en = {
   "nav.footer": "Secondary navigation",
   "nav.social": "Social networks",
   "nav.accessibility": "Accessibility",
+  "nav.privacy": "Privacy",
+  "nav.terms": "Terms",
   "nav.skip": "Skip to main content",
   "nav.menuOpen": "Open menu",
   "nav.menuClose": "Close menu",
@@ -137,6 +139,8 @@ export const en = {
     "Finish the current round or you have reached the maximum rounds.",
   "manage.scoreUpdated":
     "Score updated: {home} {homeScore} : {awayScore} {away}",
+  "manage.errorSync":
+    "Saved only on this device — server sync failed. Check your connection and try again.",
 
   "public.loading": "Loading tournament…",
   "public.notFoundTitle": "Tournament not found",
@@ -315,4 +319,40 @@ export const en = {
   "a11y.item.locale": "Language toggle with matching lang attribute",
   "a11y.item.identity":
     "Flags and logos with text labels (not color alone)",
+
+  "privacy.title": "Privacy policy",
+  "privacy.lead":
+    "How ScoreLive handles data with open registration, no payments, and no OAuth.",
+  "privacy.reviewNote":
+    "This copy is an operator-reviewable draft for the ScoreLive product — not legal advice. Review it before a marketing launch.",
+  "privacy.s1Title": "What we collect",
+  "privacy.s1Body":
+    "On registration: username and a password hash. When you organize: tournaments, teams, matches, and scores tied to your account. Favorites are stored for signed-in users. This version has no payments, profile emails, or external identity providers.",
+  "privacy.s2Title": "Where data is hosted",
+  "privacy.s2Body":
+    "The app runs on Vercel. Durable data (users, sessions, tournaments, favorites, auth rate-limit counters) lives in Turso (libSQL). Demo tournaments may remain in the browser (localStorage).",
+  "privacy.s3Title": "Cookies and sessions",
+  "privacy.s3Body":
+    "We use HttpOnly session cookies (HMAC plus a session id) to keep you signed in. Sessions can be revoked on logout. A favorites cookie helps sync guest favorites. ScoreLive does not set advertising or third-party tracking cookies.",
+  "privacy.s4Title": "Contact",
+  "privacy.s4Body":
+    "For data questions, open an issue on the public GitHub repository: esmobg/turnyfly.",
+
+  "terms.title": "Terms of use",
+  "terms.lead":
+    "Rules for using ScoreLive as an open tournament platform.",
+  "terms.reviewNote":
+    "This copy is an operator-reviewable draft for the ScoreLive product — not legal advice. Review it before a marketing launch.",
+  "terms.s1Title": "The service",
+  "terms.s1Body":
+    "ScoreLive lets you register an organizer account, create and share tournaments, and enter scores. The product is open source (MIT). This version has no payments, subscriptions, or OAuth.",
+  "terms.s2Title": "Your responsibilities",
+  "terms.s2Body":
+    "You are responsible for your password and for the content of tournaments you publish. Do not abuse the API (for example automated login attempts). We may rate-limit requests to reduce abuse.",
+  "terms.s3Title": "Availability and data",
+  "terms.s3Body":
+    "The service is provided as-is. Outages or data loss can occur even with host-side backups. Keep critical results elsewhere if they matter.",
+  "terms.s4Title": "Contact",
+  "terms.s4Body":
+    "For feedback and issue reports: the GitHub repository esmobg/turnyfly.",
 } as const satisfies Messages;

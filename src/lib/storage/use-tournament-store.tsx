@@ -98,10 +98,17 @@ function setCache(next: StoreSnapshot) {
   emit();
 }
 
+export type TournamentSaveResult =
+  | { ok: true }
+  | {
+      ok: false;
+      error: "unauthorized" | "forbidden" | "sync_failed";
+    };
+
 interface TournamentStoreValue {
   tournaments: Tournament[];
   ready: boolean;
-  save: (tournament: Tournament) => Promise<void>;
+  save: (tournament: Tournament) => Promise<TournamentSaveResult>;
   remove: (id: string) => Promise<void>;
   reset: () => void;
   getById: (id: string) => Tournament | undefined;
@@ -189,53 +196,76 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const save = useCallback(async (tournament: Tournament) => {
-    const optimistic = upsertLocal(tournament);
-    memoryCache = optimistic;
-    emit();
+  const save = useCallback(
+    async (tournament: Tournament): Promise<TournamentSaveResult> => {
+      const optimistic = upsertLocal(tournament);
+      memoryCache = optimistic;
+      emit();
 
-    // Seed demos stay local-only.
-    if (!tournament.ownerUsername || tournament.id.startsWith("demo-")) {
-      return;
-    }
+      // Seed demos stay local-only.
+      if (!tournament.ownerUsername || tournament.id.startsWith("demo-")) {
+        return { ok: true };
+      }
 
-    try {
-      const existing = await fetch(`/api/tournaments/${tournament.id}`, {
-        credentials: "include",
-      });
-      if (existing.status === 404) {
-        const created = await fetch("/api/tournaments", {
-          method: "POST",
+      try {
+        const existing = await fetch(`/api/tournaments/${tournament.id}`, {
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tournament }),
         });
-        if (created.ok) {
+        if (existing.status === 404) {
+          const created = await fetch("/api/tournaments", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tournament }),
+          });
+          if (created.status === 401) {
+            return { ok: false, error: "unauthorized" };
+          }
+          if (created.status === 403) {
+            return { ok: false, error: "forbidden" };
+          }
+          if (!created.ok) {
+            return { ok: false, error: "sync_failed" };
+          }
           const data = (await created.json()) as { tournament: Tournament };
           const next = upsertLocal(data.tournament);
           memoryCache = next;
           emit();
+          return { ok: true };
         }
-        return;
-      }
-      if (existing.ok) {
+        if (existing.status === 401) {
+          return { ok: false, error: "unauthorized" };
+        }
+        if (!existing.ok) {
+          return { ok: false, error: "sync_failed" };
+        }
+
         const patched = await fetch(`/api/tournaments/${tournament.id}`, {
           method: "PATCH",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tournament }),
         });
-        if (patched.ok) {
-          const data = (await patched.json()) as { tournament: Tournament };
-          const next = upsertLocal(data.tournament);
-          memoryCache = next;
-          emit();
+        if (patched.status === 401) {
+          return { ok: false, error: "unauthorized" };
         }
+        if (patched.status === 403) {
+          return { ok: false, error: "forbidden" };
+        }
+        if (!patched.ok) {
+          return { ok: false, error: "sync_failed" };
+        }
+        const data = (await patched.json()) as { tournament: Tournament };
+        const next = upsertLocal(data.tournament);
+        memoryCache = next;
+        emit();
+        return { ok: true };
+      } catch {
+        return { ok: false, error: "sync_failed" };
       }
-    } catch {
-      // Offline: local cache already updated.
-    }
-  }, []);
+    },
+    [],
+  );
 
   const remove = useCallback(async (id: string) => {
     const next = deleteFromLocal(id);

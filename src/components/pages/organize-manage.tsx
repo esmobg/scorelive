@@ -134,6 +134,24 @@ export function OrganizeManagePage() {
     setLogoStatus("");
   }
 
+  function reportSaveError(
+    result: Awaited<ReturnType<typeof save>>,
+  ): boolean {
+    if (result.ok) {
+      return false;
+    }
+    if (result.error === "unauthorized") {
+      window.location.href = `/login?next=${encodeURIComponent(`/organize/${id}`)}`;
+      return true;
+    }
+    if (result.error === "forbidden") {
+      setFormError(t("manage.forbiddenBody"));
+      return true;
+    }
+    setFormError(t("manage.errorSync"));
+    return true;
+  }
+
   async function handleAddTeam(event: React.FormEvent) {
     event.preventDefault();
     if (!teamName.trim()) {
@@ -145,13 +163,16 @@ export function OrganizeManagePage() {
       return;
     }
     setFormError("");
-    await save(
+    const result = await save(
       addTeam(tournament!, {
         name: teamName,
         countryCode,
         logoDataUrl,
       }),
     );
+    if (reportSaveError(result)) {
+      return;
+    }
     setTeamName("");
     setLogoDataUrl(undefined);
     setLogoStatus("");
@@ -163,7 +184,10 @@ export function OrganizeManagePage() {
       return;
     }
     setFormError("");
-    await save(generateFixtures(tournament!));
+    const result = await save(generateFixtures(tournament!));
+    if (reportSaveError(result)) {
+      return;
+    }
     setLiveMessage(t("manage.fixturesGenerated"));
   }
 
@@ -173,7 +197,10 @@ export function OrganizeManagePage() {
       return;
     }
     setFormError("");
-    await save(generateNextSwissRound(tournament!));
+    const result = await save(generateNextSwissRound(tournament!));
+    if (reportSaveError(result)) {
+      return;
+    }
     setLiveMessage(t("manage.nextSwissRoundDone"));
   }
 
@@ -182,17 +209,14 @@ export function OrganizeManagePage() {
     homeScore: number,
     awayScore: number,
   ) {
-    const authRes = await fetch("/api/scores/authorize", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (!authRes.ok) {
-      window.location.href = `/login?next=${encodeURIComponent(`/organize/${id}`)}`;
-      return;
-    }
+    // Scores persist only via owner-checked PATCH /api/tournaments/[id].
     const match = tournament!.matches.find((m) => m.id === matchId);
     const next = setMatchScore(tournament!, matchId, homeScore, awayScore);
-    await save(next);
+    setFormError("");
+    const result = await save(next);
+    if (reportSaveError(result)) {
+      return;
+    }
     const home =
       tournament!.teams.find((team) => team.id === match?.homeTeamId)?.name ??
       "";

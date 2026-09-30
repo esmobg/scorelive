@@ -65,7 +65,15 @@ export function OrganizeCreatePage() {
       advancePerGroup: 2,
       ownerUsername: username ?? undefined,
     });
-    await save(tournament);
+    const result = await save(tournament);
+    if (!result.ok) {
+      if (result.error === "unauthorized") {
+        router.push(`/login?next=${encodeURIComponent("/organize")}`);
+        return;
+      }
+      setError(t("manage.errorSync"));
+      return;
+    }
     router.push(`/organize/${tournament.id}`);
   }
 

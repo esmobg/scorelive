@@ -176,6 +176,35 @@ test.describe("ScoreLive smoke", () => {
     ).toHaveCount(0);
   });
 
+  test("privacy and terms pages render with footer links", async ({ page }) => {
+    await page.goto("/");
+    const footer = page.getByRole("contentinfo");
+    await expect(footer.getByRole("link", { name: "Поверителност" })).toBeVisible();
+    await expect(footer.getByRole("link", { name: "Условия" })).toBeVisible();
+    await footer.getByRole("link", { name: "Поверителност" }).click();
+    await expect(page).toHaveURL(/\/privacy/);
+    await expect(
+      page.getByRole("heading", { name: "Политика за поверителност" }),
+    ).toBeVisible();
+    await page.goto("/terms");
+    await expect(
+      page.getByRole("heading", { name: "Условия за ползване" }),
+    ).toBeVisible();
+  });
+
+  test("health endpoint reports app and db", async ({ request }) => {
+    const res = await request.get("/api/health");
+    expect(res.ok()).toBeTruthy();
+    const body = (await res.json()) as {
+      ok: boolean;
+      app: string;
+      db: string;
+    };
+    expect(body.ok).toBe(true);
+    expect(body.app).toBe("scorelive");
+    expect(["turso", "local"]).toContain(body.db);
+  });
+
   test("home page includes FAQ section with shared questions", async ({
     page,
   }) => {
