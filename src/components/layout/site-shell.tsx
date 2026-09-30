@@ -6,11 +6,13 @@ import { BrandMark } from "@/components/brand/brand-mark";
 import { useLocale } from "@/i18n/locale-provider";
 import type { Locale } from "@/i18n";
 import { useAuth } from "@/lib/auth/auth-provider";
+import { useTheme } from "@/lib/theme/theme-provider";
 import { socialLinks } from "@/lib/social";
 
 export function SiteHeader() {
   const { locale, setLocale, t } = useLocale();
   const { authenticated, logout, ready } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuId = useId();
 
@@ -61,6 +63,20 @@ export function SiteHeader() {
             labelEn={t("locale.en")}
             groupLabel={t("locale.label")}
           />
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={
+              theme === "dark" ? t("theme.toggleToLight") : t("theme.toggleToDark")
+            }
+            aria-pressed={theme === "dark"}
+            title={theme === "dark" ? t("theme.light") : t("theme.dark")}
+          >
+            <span aria-hidden="true" className="text-xs font-semibold tracking-wide">
+              {theme === "dark" ? t("theme.light") : t("theme.dark")}
+            </span>
+          </button>
           <nav
             aria-label={t("nav.main")}
             className="hidden items-center md:flex"

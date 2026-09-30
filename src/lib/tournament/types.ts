@@ -2,9 +2,10 @@ export type TournamentFormat =
   | "groups"
   | "knockout"
   | "groups_knockout"
-  | "league";
+  | "league"
+  | "swiss";
 
-export type MatchStage = "group" | "knockout";
+export type MatchStage = "group" | "knockout" | "swiss";
 
 export type MatchSlot = "home" | "away";
 
@@ -61,10 +62,10 @@ export interface Tournament {
   groupCount: number;
   /** Teams advancing from each group into knockout. */
   advancePerGroup: number;
+  /** Target Swiss round count (set when fixtures are generated). */
+  swissRounds?: number;
   /**
-   * Soft client-side owner (localStorage only). When set, organize mutations
-   * should match the session username. Seed demos omit this. Residual risk:
-   * any same-origin script can still rewrite localStorage (C4).
+   * Owner username. Server-backed tournaments always set this; seed demos omit it.
    */
   ownerUsername?: string;
   createdAt: string;
@@ -81,6 +82,8 @@ export interface StandingRow {
   goalsAgainst: number;
   goalDiff: number;
   points: number;
+  /** Swiss tie-break: sum of opponents' points. */
+  buchholz?: number;
 }
 
 export interface CreateTournamentInput {
@@ -91,5 +94,6 @@ export interface CreateTournamentInput {
   format: TournamentFormat;
   groupCount?: number;
   advancePerGroup?: number;
+  swissRounds?: number;
   ownerUsername?: string;
 }

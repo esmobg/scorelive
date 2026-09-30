@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { ORGANIZERS_COOKIE } from "@/lib/auth/organizers";
 import {
   assertSameOrigin,
   consumeAuthRateLimit,
@@ -7,13 +6,16 @@ import {
 import {
   createSessionToken,
   FAVORITES_COOKIE,
-  mergeFavoriteIds,
   normalizeFavoriteIds,
   parseFavoriteIds,
   SESSION_COOKIE,
   sessionCookieOptions,
   verifyLoginCredentials,
 } from "@/lib/auth/session";
+import { ensureUserRow, findUserByUsername } from "@/lib/db/users";
+import { mergeFavoriteIdsForUser } from "@/lib/db/favorites";
+import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
+import { DEMO_ADMIN_USERNAME } from "@/lib/auth/session";
 
 function cookieValue(header: string, name: string): string | undefined {
   return header
@@ -53,10 +55,7 @@ export async function POST(request: Request) {
   const username = typeof body.username === "string" ? body.username.trim() : "";
   const password = typeof body.password === "string" ? body.password : "";
 
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const organizersRaw = cookieValue(cookieHeader, ORGANIZERS_COOKIE);
-
-  const ok = await verifyLoginCredentials(username, password, organizersRaw);
+  const ok = await verifyLoginCredentials(username, password);
   if (!ok) {
     return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
   }
@@ -66,10 +65,24 @@ export async function POST(request: Request) {
   response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions());
 
   const clientFavorites = normalizeFavoriteIds(body.favorites);
-  const existing = parseFavoriteIds(
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const existingCookie = parseFavoriteIds(
     cookieValue(cookieHeader, FAVORITES_COOKIE),
   );
-  const merged = mergeFavoriteIds(existing, clientFavorites);
+
+  let dbUser = await findUserByUsername(username);
+  if (
+    !dbUser &&
+    isDemoAdminEnabled() &&
+    username === DEMO_ADMIN_USERNAME
+  ) {
+    dbUser = await ensureUserRow(username);
+  }
+  let merged = normalizeFavoriteIds([...existingCookie, ...clientFavorites]);
+  if (dbUser) {
+    merged = await mergeFavoriteIdsForUser(dbUser.id, merged);
+  }
+
   response.cookies.set(
     FAVORITES_COOKIE,
     JSON.stringify(merged),

@@ -55,6 +55,55 @@
   --sidebar-ring: var(--tf-focus);
 }
 
+/* Dark theme — deep forest night; body text vs surfaces ≥ 7:1 (AAA-oriented) */
+.dark {
+  --tf-ink: #e8f7ef;
+  --tf-ink-muted: #b7d4c4;
+  --tf-foam: #0d1f18;
+  --tf-mist: #08140f;
+  --tf-line: #6f9a84;
+  --tf-accent: #6dca9a;
+  --tf-accent-deep: #8fd9b0;
+  --tf-danger: #ffb4b0;
+  --tf-glow: #c6e85a;
+  --tf-sky: #6aa892;
+  --tf-surface: color-mix(in srgb, var(--tf-foam) 88%, black);
+  --tf-focus: #8fd9b0;
+
+  --background: var(--tf-mist);
+  --foreground: var(--tf-ink);
+  --card: var(--tf-foam);
+  --card-foreground: var(--tf-ink);
+  --popover: var(--tf-foam);
+  --popover-foreground: var(--tf-ink);
+  --primary: var(--tf-accent-deep);
+  --primary-foreground: #041c12;
+  --secondary: #163528;
+  --secondary-foreground: var(--tf-ink);
+  --muted: #12281e;
+  --muted-foreground: var(--tf-ink-muted);
+  --accent: #1a3a2c;
+  --accent-foreground: var(--tf-ink);
+  --destructive: var(--tf-danger);
+  --border: var(--tf-line);
+  --input: #4f7564;
+  --ring: var(--tf-focus);
+
+  --chart-1: #6dca9a;
+  --chart-2: #b7d4c4;
+  --chart-3: #8fd9b0;
+  --chart-4: #c6e85a;
+  --chart-5: #6aa892;
+  --sidebar: var(--tf-foam);
+  --sidebar-foreground: var(--tf-ink);
+  --sidebar-primary: var(--tf-accent-deep);
+  --sidebar-primary-foreground: #041c12;
+  --sidebar-accent: #163528;
+  --sidebar-accent-foreground: var(--tf-ink);
+  --sidebar-border: var(--tf-line);
+  --sidebar-ring: var(--tf-focus);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -161,6 +210,14 @@
     min-height: 100%;
     overflow-x: clip;
     max-width: 100%;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 90% 55% at 8% -8%, color-mix(in srgb, var(--tf-glow) 18%, transparent), transparent 58%),
+      radial-gradient(ellipse 70% 45% at 100% 0%, color-mix(in srgb, var(--tf-sky) 22%, transparent), transparent 52%),
+      radial-gradient(ellipse 50% 35% at 50% 100%, color-mix(in srgb, var(--tf-accent) 12%, transparent), transparent 60%),
+      linear-gradient(180deg, #0a1812 0%, var(--tf-mist) 42%, #06110c 100%);
   }
 
   :focus-visible {
@@ -308,6 +365,25 @@
 .locale-toggle button[aria-pressed="true"] {
   background: var(--tf-accent-deep);
   color: #f4fff9;
+}
+
+.dark .locale-toggle button[aria-pressed="true"] {
+  color: #041c12;
+}
+
+.theme-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--tf-line) 70%, transparent);
+  border-radius: 0.55rem;
+  background: var(--tf-foam);
+  color: var(--tf-ink);
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .sr-only {

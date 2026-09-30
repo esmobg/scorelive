@@ -26,9 +26,10 @@ export function MatchList({
     return <p className="text-[var(--tf-ink-muted)]">{empty}</p>;
   }
 
+  const stageOrder = { group: 0, swiss: 1, knockout: 2 } as const;
   const sorted = [...matches].sort((a, b) => {
     if (a.stage !== b.stage) {
-      return a.stage === "group" ? -1 : 1;
+      return stageOrder[a.stage] - stageOrder[b.stage];
     }
     return a.round - b.round || a.label.localeCompare(b.label);
   });

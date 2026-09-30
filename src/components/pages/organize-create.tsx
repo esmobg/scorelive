@@ -27,6 +27,7 @@ const formats: TournamentFormat[] = [
   "knockout",
   "groups_knockout",
   "league",
+  "swiss",
 ];
 
 export function OrganizeCreatePage() {
@@ -43,7 +44,7 @@ export function OrganizeCreatePage() {
   const [groupCount, setGroupCount] = useState("2");
   const [error, setError] = useState("");
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!name.trim() || !sport.trim() || !startDate || !endDate) {
       setError(t("organize.errorRequired"));
@@ -64,7 +65,7 @@ export function OrganizeCreatePage() {
       advancePerGroup: 2,
       ownerUsername: username ?? undefined,
     });
-    save(tournament);
+    await save(tournament);
     router.push(`/organize/${tournament.id}`);
   }
 
@@ -141,7 +142,8 @@ export function OrganizeCreatePage() {
                 value === "groups" ||
                 value === "knockout" ||
                 value === "groups_knockout" ||
-                value === "league"
+                value === "league" ||
+                value === "swiss"
               ) {
                 setFormat(value);
               }

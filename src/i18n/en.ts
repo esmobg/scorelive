@@ -37,7 +37,8 @@ export const en = {
   "home.ctaOrganize": "Organize a tournament",
   "home.ctaFollow": "Follow tournaments",
   "home.tournamentsHeading": "Tournaments",
-  "home.tournamentsLead": "Demo data loads locally in your browser.",
+  "home.tournamentsLead":
+    "Demo tournaments load locally; organizer tournaments sync from the shared database.",
   "home.resetDemo": "Restore demo",
   "home.loading": "Loading tournaments…",
   "home.emptyTitle": "No tournaments",
@@ -47,7 +48,7 @@ export const en = {
     "Three steps from idea to live standings — no paid plans.",
   "home.howStep1Title": "Pick a format",
   "home.howStep1Body":
-    "Choose groups, knockout, both, or a full league championship.",
+    "Choose groups, knockout, both, league, or Swiss system.",
   "home.howStep2Title": "Add teams and scores",
   "home.howStep2Body":
     "Enter participants, generate fixtures, and keep results up to date.",
@@ -71,10 +72,17 @@ export const en = {
   "format.knockout": "Knockout",
   "format.groups_knockout": "Groups → knockout",
   "format.league": "League",
+  "format.swiss": "Swiss system",
+
+  "theme.label": "Theme",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "theme.toggleToLight": "Switch to light theme",
+  "theme.toggleToDark": "Switch to dark theme",
 
   "organize.title": "Organize a tournament",
   "organize.lead":
-    "Universal format — groups, knockout, both, or a league table. Sport is free text.",
+    "Universal format — groups, knockout, both, league, or Swiss system. Sport is free text.",
   "organize.name": "Tournament name",
   "organize.sport": "Sport / discipline",
   "organize.sportPlaceholder": "e.g. Volleyball, Chess, Football",
@@ -95,7 +103,7 @@ export const en = {
   "manage.notFoundBody": "Check the address or create a new tournament.",
   "manage.forbiddenTitle": "Not your tournament",
   "manage.forbiddenBody":
-    "This tournament is owned by another organizer in this browser. Soft client-side check only — data still lives in localStorage.",
+    "This tournament belongs to another organizer. Only the owner can edit it.",
   "manage.backOrganize": "Back to organize",
   "manage.publicLink": "Public follow page",
   "manage.tabsLabel": "Management sections",
@@ -123,6 +131,10 @@ export const en = {
   "manage.scoresAllDone":
     "All available matches have scores. You can still edit below.",
   "manage.fixturesGenerated": "Fixtures have been generated.",
+  "manage.nextSwissRound": "Generate next round",
+  "manage.nextSwissRoundDone": "Next Swiss round generated.",
+  "manage.nextSwissRoundBlocked":
+    "Finish the current round or you have reached the maximum rounds.",
   "manage.scoreUpdated":
     "Score updated: {home} {homeScore} : {awayScore} {away}",
 
@@ -150,7 +162,7 @@ export const en = {
 
   "favorites.title": "Favorite tournaments",
   "favorites.lead":
-    "Saved tournaments stay in this browser. When you are logged in as admin, they also sync with your session.",
+    "Saved tournaments stay in this browser. When you are logged in, they sync to your account in the database.",
   "favorites.loading": "Loading…",
   "favorites.emptyTitle": "No favorites yet",
   "favorites.emptyBody":
@@ -202,10 +214,10 @@ export const en = {
 
   "how.title": "How it works",
   "how.lead":
-    "From create to share — a short flow with no cloud database in this version.",
+    "From create to share — a short flow with a shared database for registered organizers.",
   "how.step1Title": "1. Create a tournament",
   "how.step1Body":
-    "Log in as admin, choose a sport and format: groups, knockout, both, or league.",
+    "Log in or register, choose a sport and format: groups, knockout, both, league, or Swiss.",
   "how.step2Title": "2. Add participants",
   "how.step2Body":
     "Enter teams with nationality and optional logos, then generate fixtures.",
@@ -224,10 +236,10 @@ export const en = {
     "No. Public pages, discovery, and favorites are open. An admin account is only required to organize and enter scores.",
   "faq.q2": "Where is data stored?",
   "faq.a2":
-    "Tournaments live in browser localStorage. Favorites do too; when an admin is logged in they also sync into the session cookie.",
-  "faq.q3": "What is the League format?",
+    "Demo tournaments stay local. Tournaments owned by registered organizers are stored in Turso (libSQL). Logged-in favorites sync to the database.",
+  "faq.q3": "What are League and Swiss formats?",
   "faq.a3":
-    "A single round-robin (each team plays every other once). Points are 3/1/0; standings sort by points → goal difference → goals for.",
+    "League: round-robin (3/1/0). Swiss: several rounds paired by points, no rematches, Buchholz tie-break.",
   "faq.q4": "Are there payments or OAuth?",
   "faq.a4":
     "Not in this version. No payments, email password reset, or external identity providers.",
@@ -244,8 +256,11 @@ export const en = {
   "standings.colLost": "L",
   "standings.colDiff": "GD",
   "standings.colPoints": "Pts",
+  "standings.colBuchholz": "Bh",
   "standings.legend":
     "P = played, W = won, D = drawn, L = lost, GD = goal difference, Pts = points",
+  "standings.legendSwiss":
+    "P = played, W = won, D = drawn, L = lost, GD = score diff, Pts = points (1/½/0), Bh = Buchholz",
 
   "matches.empty": "No matches.",
   "matches.listLabel": "Match list",
@@ -270,6 +285,8 @@ export const en = {
   "group.name": "Group {letter}",
   "match.groupRound": "{group} · Round {round}",
   "match.roundOnly": "Round {round}",
+  "match.swissRound": "Swiss · Round {round}",
+  "match.swissBye": "Swiss · Round {round} · Bye",
   "knockout.final": "Final",
   "knockout.semi": "Semi-final",
   "knockout.quarter": "Quarter-final",

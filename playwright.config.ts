@@ -33,6 +33,8 @@ export default defineConfig({
       TURNYFLY_SESSION_SECRET: E2E_SESSION_SECRET,
       DEMO_ADMIN_ENABLED: "true",
       NEXT_PUBLIC_SITE_URL: "http://127.0.0.1",
+      // File-backed libSQL for e2e (no remote Turso required).
+      TURSO_DATABASE_URL: `file:${process.cwd()}/.data/scorelive-e2e.db`,
     },
   },
 });

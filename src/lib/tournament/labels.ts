@@ -98,6 +98,13 @@ export function localizeMatchLabel(
     );
   }
 
+  if (match.stage === "swiss") {
+    if (!match.awayTeamId || !match.homeTeamId) {
+      return t("match.swissBye", { round: match.round });
+    }
+    return t("match.swissRound", { round: match.round });
+  }
+
   if (knockoutTeamsInRound) {
     return knockoutRoundLabelFor(knockoutTeamsInRound, t);
   }

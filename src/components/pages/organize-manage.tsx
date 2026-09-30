@@ -5,7 +5,9 @@ import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   addTeam,
+  canGenerateNextSwissRound,
   generateFixtures,
+  generateNextSwissRound,
   removeTeam,
   setMatchScore,
 } from "@/lib/tournament";
@@ -132,7 +134,7 @@ export function OrganizeManagePage() {
     setLogoStatus("");
   }
 
-  function handleAddTeam(event: React.FormEvent) {
+  async function handleAddTeam(event: React.FormEvent) {
     event.preventDefault();
     if (!teamName.trim()) {
       setFormError(t("manage.errorTeamName"));
@@ -143,7 +145,7 @@ export function OrganizeManagePage() {
       return;
     }
     setFormError("");
-    save(
+    await save(
       addTeam(tournament!, {
         name: teamName,
         countryCode,
@@ -155,14 +157,24 @@ export function OrganizeManagePage() {
     setLogoStatus("");
   }
 
-  function handleGenerate() {
+  async function handleGenerate() {
     if (tournament!.teams.length < 2) {
       setFormError(t("manage.errorMinTeams"));
       return;
     }
     setFormError("");
-    save(generateFixtures(tournament!));
+    await save(generateFixtures(tournament!));
     setLiveMessage(t("manage.fixturesGenerated"));
+  }
+
+  async function handleNextSwissRound() {
+    if (!canGenerateNextSwissRound(tournament!)) {
+      setFormError(t("manage.nextSwissRoundBlocked"));
+      return;
+    }
+    setFormError("");
+    await save(generateNextSwissRound(tournament!));
+    setLiveMessage(t("manage.nextSwissRoundDone"));
   }
 
   async function handleScore(
@@ -180,7 +192,7 @@ export function OrganizeManagePage() {
     }
     const match = tournament!.matches.find((m) => m.id === matchId);
     const next = setMatchScore(tournament!, matchId, homeScore, awayScore);
-    save(next);
+    await save(next);
     const home =
       tournament!.teams.find((team) => team.id === match?.homeTeamId)?.name ??
       "";
@@ -333,7 +345,9 @@ export function OrganizeManagePage() {
                     type="button"
                     variant="ghost"
                     className="min-h-11"
-                    onClick={() => save(removeTeam(tournament, team.id))}
+                    onClick={() => {
+                      void save(removeTeam(tournament, team.id));
+                    }}
                   >
                     {t("manage.removeTeam")}
                   </Button>
@@ -341,9 +355,22 @@ export function OrganizeManagePage() {
               ))}
             </ul>
           )}
-          <Button type="button" onClick={handleGenerate} className="min-h-11">
-            {t("manage.generate")}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" onClick={() => void handleGenerate()} className="min-h-11">
+              {t("manage.generate")}
+            </Button>
+            {tournament.format === "swiss" ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void handleNextSwissRound()}
+                className="min-h-11"
+                disabled={!canGenerateNextSwissRound(tournament)}
+              >
+                {t("manage.nextSwissRound")}
+              </Button>
+            ) : null}
+          </div>
         </TabsContent>
 
         <TabsContent value="fixtures" className="space-y-4 pt-4">
@@ -353,6 +380,16 @@ export function OrganizeManagePage() {
             groups={tournament.groups}
             emptyMessage={t("manage.fixturesEmpty")}
           />
+          {tournament.format === "swiss" ? (
+            <Button
+              type="button"
+              onClick={() => void handleNextSwissRound()}
+              className="min-h-11"
+              disabled={!canGenerateNextSwissRound(tournament)}
+            >
+              {t("manage.nextSwissRound")}
+            </Button>
+          ) : null}
         </TabsContent>
 
         <TabsContent value="scores" className="space-y-4 pt-4">

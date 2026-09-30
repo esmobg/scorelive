@@ -130,6 +130,34 @@ test.describe("ScoreLive smoke", () => {
     ).toBeVisible();
   });
 
+  test("swiss demo shows standings with Buchholz", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Възстанови демо" }).click();
+    await page.goto("/tournaments/demo-swiss");
+    await expect(
+      page.getByRole("heading", { name: "Швейцарска система Русе" }),
+    ).toBeVisible();
+    await expect(page.getByText(/Швейцарска система ·/)).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Класиране" })).toBeVisible();
+    await expect(page.getByRole("columnheader", { name: "Бх" })).toBeVisible();
+  });
+
+  test("theme toggle persists dark class on html", async ({ page }) => {
+    await page.goto("/");
+    const toggle = page.getByRole("button", {
+      name: "Превключи към тъмна тема",
+    });
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    await page.reload();
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    await page
+      .getByRole("button", { name: "Превключи към светла тема" })
+      .click();
+    await expect(page.locator("html")).not.toHaveClass(/dark/);
+  });
+
   test("about and faq content pages render", async ({ page }) => {
     await page.goto("/about");
     await expect(page.getByRole("heading", { name: "За ScoreLive" })).toBeVisible();

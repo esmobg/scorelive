@@ -7,10 +7,23 @@ import {
   parseFavoriteIds,
   sessionCookieOptions,
 } from "@/lib/auth/session";
+import { findUserByUsername } from "@/lib/db/users";
+import {
+  listFavoriteIds,
+  replaceFavoriteIds,
+} from "@/lib/db/favorites";
 import { cookies } from "next/headers";
 
 export async function GET() {
   const jar = await cookies();
+  const session = await getSession();
+  if (session) {
+    const user = await findUserByUsername(session.username);
+    if (user) {
+      const favorites = await listFavoriteIds(user.id);
+      return NextResponse.json({ favorites });
+    }
+  }
   const favorites = parseFavoriteIds(jar.get(FAVORITES_COOKIE)?.value);
   return NextResponse.json({ favorites });
 }
@@ -33,11 +46,15 @@ export async function PUT(request: Request) {
   }
 
   const unique = normalizeFavoriteIds(body.favorites);
+  const user = await findUserByUsername(session.username);
+  const persisted = user
+    ? await replaceFavoriteIds(user.id, unique)
+    : unique;
 
-  const response = NextResponse.json({ favorites: unique });
+  const response = NextResponse.json({ favorites: persisted });
   response.cookies.set(
     FAVORITES_COOKIE,
-    JSON.stringify(unique),
+    JSON.stringify(persisted),
     sessionCookieOptions(),
   );
   return response;

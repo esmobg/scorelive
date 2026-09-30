@@ -12,10 +12,12 @@ import {
 } from "react";
 import type { Tournament } from "@/lib/tournament";
 import {
-  deleteTournament as deleteFromStore,
+  deleteTournament as deleteFromLocal,
+  getSeedTournaments,
   loadTournaments,
   resetToSeed,
-  upsertTournament,
+  saveTournaments,
+  upsertTournament as upsertLocal,
 } from "@/lib/storage";
 
 type StoreSnapshot = Tournament[];
@@ -28,6 +30,34 @@ function emit() {
   for (const listener of listeners) {
     listener();
   }
+}
+
+function mergeServerAndLocal(
+  local: Tournament[],
+  server: Tournament[],
+): Tournament[] {
+  const byId = new Map<string, Tournament>();
+  for (const seed of getSeedTournaments()) {
+    byId.set(seed.id, seed);
+  }
+  for (const item of local) {
+    // Prefer local edits for seed demos; skip owned server copies later.
+    if (!item.ownerUsername || item.id.startsWith("demo-")) {
+      byId.set(item.id, item);
+    }
+  }
+  for (const item of server) {
+    byId.set(item.id, item);
+  }
+  // Keep non-seed local-only drafts that failed to sync (rare offline).
+  for (const item of local) {
+    if (!byId.has(item.id)) {
+      byId.set(item.id, item);
+    }
+  }
+  return [...byId.values()].sort((a, b) =>
+    b.updatedAt.localeCompare(a.updatedAt),
+  );
 }
 
 function readStore(): StoreSnapshot {
@@ -62,18 +92,36 @@ function getServerSnapshot(): StoreSnapshot {
   return EMPTY;
 }
 
+function setCache(next: StoreSnapshot) {
+  memoryCache = next;
+  saveTournaments(next);
+  emit();
+}
+
 interface TournamentStoreValue {
   tournaments: Tournament[];
   ready: boolean;
-  save: (tournament: Tournament) => void;
-  remove: (id: string) => void;
+  save: (tournament: Tournament) => Promise<void>;
+  remove: (id: string) => Promise<void>;
   reset: () => void;
   getById: (id: string) => Tournament | undefined;
+  refresh: () => Promise<void>;
 }
 
 const TournamentStoreContext = createContext<TournamentStoreValue | null>(
   null,
 );
+
+async function fetchServerTournaments(): Promise<Tournament[]> {
+  try {
+    const res = await fetch("/api/tournaments", { credentials: "include" });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { tournaments?: Tournament[] };
+    return Array.isArray(data.tournaments) ? data.tournaments : [];
+  } catch {
+    return [];
+  }
+}
 
 export function TournamentStoreProvider({ children }: { children: ReactNode }) {
   const tournaments = useSyncExternalStore(
@@ -83,29 +131,101 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
   );
   const [ready, setReady] = useState(false);
 
+  const refresh = useCallback(async () => {
+    const local = loadTournaments();
+    const server = await fetchServerTournaments();
+    const merged = mergeServerAndLocal(local, server);
+    setCache(merged);
+  }, []);
+
   useEffect(() => {
-    memoryCache = loadTournaments();
-    setReady(true);
-    emit();
+    let cancelled = false;
+    async function hydrate() {
+      const local = loadTournaments();
+      memoryCache = local;
+      emit();
+      const server = await fetchServerTournaments();
+      if (cancelled) return;
+      setCache(mergeServerAndLocal(local, server));
+      setReady(true);
+    }
+    void hydrate();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const save = useCallback((tournament: Tournament) => {
-    upsertTournament(tournament);
-    memoryCache = null;
+  const save = useCallback(async (tournament: Tournament) => {
+    const optimistic = upsertLocal(tournament);
+    memoryCache = optimistic;
     emit();
+
+    // Seed demos stay local-only.
+    if (!tournament.ownerUsername || tournament.id.startsWith("demo-")) {
+      return;
+    }
+
+    try {
+      const existing = await fetch(`/api/tournaments/${tournament.id}`, {
+        credentials: "include",
+      });
+      if (existing.status === 404) {
+        const created = await fetch("/api/tournaments", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tournament }),
+        });
+        if (created.ok) {
+          const data = (await created.json()) as { tournament: Tournament };
+          const next = upsertLocal(data.tournament);
+          memoryCache = next;
+          emit();
+        }
+        return;
+      }
+      if (existing.ok) {
+        const patched = await fetch(`/api/tournaments/${tournament.id}`, {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tournament }),
+        });
+        if (patched.ok) {
+          const data = (await patched.json()) as { tournament: Tournament };
+          const next = upsertLocal(data.tournament);
+          memoryCache = next;
+          emit();
+        }
+      }
+    } catch {
+      // Offline: local cache already updated.
+    }
   }, []);
 
-  const remove = useCallback((id: string) => {
-    deleteFromStore(id);
-    memoryCache = null;
+  const remove = useCallback(async (id: string) => {
+    const next = deleteFromLocal(id);
+    memoryCache = next;
     emit();
+    if (id.startsWith("demo-")) {
+      return;
+    }
+    try {
+      await fetch(`/api/tournaments/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch {
+      // Local already removed.
+    }
   }, []);
 
   const reset = useCallback(() => {
-    resetToSeed();
-    memoryCache = null;
+    const seed = resetToSeed();
+    memoryCache = seed;
     emit();
-  }, []);
+    void refresh();
+  }, [refresh]);
 
   const getById = useCallback(
     (id: string) => tournaments.find((t) => t.id === id),
@@ -113,8 +233,8 @@ export function TournamentStoreProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ tournaments, ready, save, remove, reset, getById }),
-    [tournaments, ready, save, remove, reset, getById],
+    () => ({ tournaments, ready, save, remove, reset, getById, refresh }),
+    [tournaments, ready, save, remove, reset, getById, refresh],
   );
 
   return (

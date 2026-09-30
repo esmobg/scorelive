@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { computeStandings, groupDisplayName } from "@/lib/tournament";
+import {
+  computeStandings,
+  computeSwissStandings,
+  groupDisplayName,
+} from "@/lib/tournament";
 import { useTournamentStore } from "@/lib/storage/use-tournament-store";
 import { formatLabel } from "@/i18n";
 import { useLocale } from "@/i18n/locale-provider";
@@ -45,6 +49,14 @@ export function PublicTournamentPage() {
     );
   }, [tournament]);
 
+  const swissStandings = useMemo(() => {
+    if (!tournament || tournament.format !== "swiss") return null;
+    return computeSwissStandings(
+      tournament.teams.map((team) => team.id),
+      tournament.matches.filter((m) => m.stage === "swiss"),
+    );
+  }, [tournament]);
+
   if (!ready) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-10">
@@ -71,7 +83,9 @@ export function PublicTournamentPage() {
   }
 
   const hasStandings =
-    groupStandings.length > 0 || overallGroupStandings !== null;
+    groupStandings.length > 0 ||
+    overallGroupStandings !== null ||
+    swissStandings !== null;
   const hasBracket = tournament.matches.some((m) => m.stage === "knockout");
   const defaultTab = hasStandings
     ? "standings"
@@ -145,6 +159,14 @@ export function PublicTournamentPage() {
                 title={t("public.standingsHeading")}
                 standings={overallGroupStandings}
                 teams={tournament.teams}
+              />
+            ) : null}
+            {swissStandings ? (
+              <StandingsTable
+                title={t("public.standingsHeading")}
+                standings={swissStandings}
+                teams={tournament.teams}
+                showBuchholz
               />
             ) : null}
           </TabsContent>

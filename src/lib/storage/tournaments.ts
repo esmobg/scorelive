@@ -215,12 +215,49 @@ function demoLeagueChampionship(): Tournament {
   return t;
 }
 
+function demoSwissOpen(): Tournament {
+  let t = createEmptyTournament({
+    name: "Швейцарска система Русе",
+    sport: "Шахмат",
+    startDate: "2026-10-01",
+    endDate: "2026-10-03",
+    format: "swiss",
+    swissRounds: 3,
+  });
+  t = { ...t, id: "demo-swiss" };
+
+  const roster: SeedTeam[] = [
+    { name: "Александров", countryCode: "BG" },
+    { name: "Борисова", countryCode: "BG" },
+    { name: "Василев", countryCode: "BG" },
+    { name: "Ганчева", countryCode: "RO" },
+    { name: "Драганов", countryCode: "BG" },
+    { name: "Еленова", countryCode: "RS" },
+    { name: "Желев", countryCode: "BG" },
+    { name: "Иванова", countryCode: "BG" },
+  ];
+  for (const team of roster) {
+    t = addTeam(t, team);
+  }
+
+  t = generateFixtures(t);
+  const playable = t.matches.filter((m) => m.homeTeamId && m.awayTeamId);
+  if (playable[0]) {
+    t = setMatchScore(t, playable[0].id, 1, 0);
+  }
+  if (playable[1]) {
+    t = setMatchScore(t, playable[1].id, 1, 1);
+  }
+  return t;
+}
+
 export function getSeedTournaments(): Tournament[] {
   return [
     demoVolleyball(),
     demoChessKnockout(),
     demoFootballGroups(),
     demoLeagueChampionship(),
+    demoSwissOpen(),
   ];
 }
 

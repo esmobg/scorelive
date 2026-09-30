@@ -1,6 +1,11 @@
 import { generateGroupStage, generateRoundRobinMatches } from "./groups";
 import { applyKnockoutScore, generateKnockoutBracket } from "./knockout";
 import { computeStandings, topTeamIds } from "./standings";
+import {
+  canGenerateNextSwissRound,
+  generateNextSwissRound,
+  generateSwissFixtures,
+} from "./swiss";
 import type {
   AddTeamInput,
   CreateTournamentInput,
@@ -26,6 +31,7 @@ export function createEmptyTournament(input: CreateTournamentInput): Tournament 
     matches: [],
     groupCount: input.groupCount ?? 2,
     advancePerGroup: input.advancePerGroup ?? 2,
+    ...(input.swissRounds ? { swissRounds: input.swissRounds } : {}),
     ...(owner ? { ownerUsername: owner } : {}),
     createdAt: now,
     updatedAt: now,
@@ -123,6 +129,9 @@ export function generateFixtures(tournament: Tournament): Tournament {
         updatedAt: new Date().toISOString(),
       };
     }
+    case "swiss": {
+      return generateSwissFixtures(tournament);
+    }
     default: {
       const _exhaustive: never = format;
       return _exhaustive;
@@ -209,5 +218,11 @@ export function setMatchScore(
     }
   }
 
+  if (next.format === "swiss" && canGenerateNextSwissRound(next)) {
+    next = generateNextSwissRound(next);
+  }
+
   return next;
 }
+
+export { generateNextSwissRound, canGenerateNextSwissRound };

@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { isDemoAdminEnabled } from "@/lib/auth/demo-admin";
 import { verifyOrganizerCredentials } from "@/lib/auth/organizers";
+import { findUserByUsername } from "@/lib/db/users";
 import {
   SESSION_COOKIE,
   verifySessionToken,
@@ -44,19 +45,28 @@ export async function verifyAdminCredentials(
   return bcrypt.compare(password, DEMO_PASSWORD_HASH);
 }
 
-/** Demo admin (when enabled) or a registered organizer (HMAC-sealed cookie). */
+/** Demo admin (when enabled) or a Turso-backed registered organizer. */
 export async function verifyLoginCredentials(
   username: string,
   password: string,
-  organizersCookie?: string,
 ): Promise<boolean> {
   if (await verifyAdminCredentials(username, password)) {
     return true;
   }
-  return verifyOrganizerCredentials(username, password, organizersCookie);
+  return verifyOrganizerCredentials(username, password);
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
   const jar = await cookies();
   return verifySessionToken(jar.get(SESSION_COOKIE)?.value);
+}
+
+/** Resolve DB user id for the current session username (null for demo admin). */
+export async function getSessionUserId(): Promise<string | null> {
+  const session = await getSession();
+  if (!session) {
+    return null;
+  }
+  const user = await findUserByUsername(session.username);
+  return user?.id ?? null;
 }

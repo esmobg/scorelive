@@ -31,6 +31,17 @@ export {
 } from "./labels";
 export { computeStandings, topTeamIds } from "./standings";
 export {
+  canGenerateNextSwissRound,
+  computeSwissStandings,
+  currentSwissRound,
+  defaultSwissRounds,
+  generateNextSwissRound,
+  generateSwissFixtures,
+  isSwissRoundComplete,
+  pairSwissRound,
+  type SwissStandingRow,
+} from "./swiss";
+export {
   addTeam,
   advanceFromGroups,
   createEmptyTournament,

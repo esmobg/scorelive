@@ -72,4 +72,5 @@ export const formatLabels: Record<TournamentFormat, string> = {
   knockout: "Елиминации",
   groups_knockout: "Групи → елиминации",
   league: "Първенство",
+  swiss: "Швейцарска система",
 };

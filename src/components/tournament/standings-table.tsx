@@ -16,9 +16,15 @@ interface StandingsTableProps {
   title: string;
   standings: StandingRow[];
   teams: Team[];
+  showBuchholz?: boolean;
 }
 
-export function StandingsTable({ title, standings, teams }: StandingsTableProps) {
+export function StandingsTable({
+  title,
+  standings,
+  teams,
+  showBuchholz = false,
+}: StandingsTableProps) {
   const { t } = useLocale();
 
   if (standings.length === 0) {
@@ -61,6 +67,11 @@ export function StandingsTable({ title, standings, teams }: StandingsTableProps)
               <TableHead scope="col" className="text-right">
                 {t("standings.colPoints")}
               </TableHead>
+              {showBuchholz ? (
+                <TableHead scope="col" className="text-right">
+                  {t("standings.colBuchholz")}
+                </TableHead>
+              ) : null}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -86,13 +97,20 @@ export function StandingsTable({ title, standings, teams }: StandingsTableProps)
                   <TableCell className="text-right font-semibold">
                     {row.points}
                   </TableCell>
+                  {showBuchholz ? (
+                    <TableCell className="text-right">
+                      {row.buchholz ?? 0}
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               );
             })}
           </TableBody>
         </Table>
       </div>
-      <p className="text-xs text-[var(--tf-ink-muted)]">{t("standings.legend")}</p>
+      <p className="text-xs text-[var(--tf-ink-muted)]">
+        {showBuchholz ? t("standings.legendSwiss") : t("standings.legend")}
+      </p>
     </section>
   );
 }

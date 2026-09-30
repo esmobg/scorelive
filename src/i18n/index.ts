@@ -1,6 +1,7 @@
 import { bg, type MessageKey, type Messages } from "./bg";
 import { en } from "./en";
 import type { Locale, TranslateFn, TranslateValues } from "./types";
+import type { TournamentFormat } from "@/lib/tournament/types";
 
 export const dictionaries: Record<Locale, Messages> = {
   bg,
@@ -33,7 +34,7 @@ export function createTranslator(locale: Locale): TranslateFn {
 }
 
 export function formatLabel(
-  format: "groups" | "knockout" | "groups_knockout" | "league",
+  format: TournamentFormat,
   t: TranslateFn,
 ): string {
   switch (format) {
@@ -45,6 +46,8 @@ export function formatLabel(
       return t("format.groups_knockout");
     case "league":
       return t("format.league");
+    case "swiss":
+      return t("format.swiss");
     default: {
       const _exhaustive: never = format;
       return _exhaustive;
