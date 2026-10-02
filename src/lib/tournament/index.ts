@@ -54,3 +54,10 @@ export {
   LIVE_POLL_MS,
   tournamentLiveFingerprint,
 } from "./live-follow";
+export {
+  byeParticipantId,
+  compareMatches,
+  ensureMatchOrders,
+  isByeMatch,
+  sortMatches,
+} from "./match-order";

@@ -39,6 +39,7 @@ export function generateKnockoutBracket(teams: Team[]): Match[] {
         id: createId("m"),
         stage: "knockout",
         round: roundIndex,
+        matchOrder: slot + 1,
         label: knockoutRoundLabel(teamsInRound),
         homeTeamId: null,
         awayTeamId: null,

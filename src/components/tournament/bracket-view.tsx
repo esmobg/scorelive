@@ -21,7 +21,8 @@ export function BracketView({
     .filter((m) => m.stage === "knockout")
     .sort(
       (a, b) =>
-        a.round - b.round || (a.bracketSlot ?? 0) - (b.bracketSlot ?? 0),
+        a.round - b.round ||
+        (a.matchOrder ?? a.bracketSlot ?? 0) - (b.matchOrder ?? b.bracketSlot ?? 0),
     );
 
   if (knockout.length === 0) {

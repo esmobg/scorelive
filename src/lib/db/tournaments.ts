@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db/client";
 import { ensureSchema } from "@/lib/db/migrate";
 import { tournaments, users, type DbTournament } from "@/lib/db/schema";
 import { coerceParticipantType } from "@/lib/api/tournament-payload";
+import { ensureMatchOrders } from "@/lib/tournament/match-order";
 import type { Tournament } from "@/lib/tournament/types";
 
 function parsePayload(raw: string): Tournament | null {
@@ -13,9 +14,13 @@ function parsePayload(raw: string): Tournament | null {
     if (!parsed || typeof parsed !== "object" || typeof parsed.id !== "string") {
       return null;
     }
+    const matches = Array.isArray(parsed.matches)
+      ? ensureMatchOrders(parsed.matches)
+      : [];
     return {
       ...parsed,
       participantType: coerceParticipantType(parsed.participantType),
+      matches,
     };
   } catch {
     return null;

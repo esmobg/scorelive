@@ -6,6 +6,7 @@ function match(partial: Partial<Match> & Pick<Match, "id">): Match {
   return {
     stage: "group",
     round: 1,
+    matchOrder: 1,
     label: "Round 1",
     homeTeamId: "a",
     awayTeamId: "b",

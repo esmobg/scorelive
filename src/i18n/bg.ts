@@ -329,7 +329,9 @@ export const bg = {
   "matches.statusPlayed": "Изигран",
   "matches.statusPending": "Чака се",
   "matches.statusUpcoming": "Предстои",
+  "matches.statusBye": "Почивка",
   "matches.waiting": "Чака се",
+  "matches.bye": "Почивка",
   "matches.vs": "срещу",
 
   "bracket.heading": "Елиминации",

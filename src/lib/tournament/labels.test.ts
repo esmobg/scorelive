@@ -22,6 +22,7 @@ describe("i18n knockout labels", () => {
       id: "m1",
       stage: "group",
       round: 1,
+      matchOrder: 1,
       label: "Група A · Кръг 1",
       groupId: "g1",
       homeTeamId: "a",

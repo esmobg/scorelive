@@ -38,6 +38,11 @@ export interface Match {
   stage: MatchStage;
   /** Round index within the stage (1-based). */
   round: number;
+  /**
+   * Stable order within the round (1-based).
+   * UI and APIs must sort by round then matchOrder — not id/createdAt.
+   */
+  matchOrder: number;
   /** Human-readable round label, e.g. "Група A · Кръг 1" or "1/4-финал". */
   label: string;
   groupId?: string;
@@ -45,6 +50,8 @@ export interface Match {
   awayTeamId: string | null;
   homeScore: number | null;
   awayScore: number | null;
+  /** Set when this row is a bye (participant id sitting out). */
+  byeParticipantId?: string;
   /** Position in the knockout bracket tree (0-based within round). */
   bracketSlot?: number;
   nextMatchId?: string;

@@ -1,6 +1,7 @@
 import {
   addTeam,
   createEmptyTournament,
+  ensureMatchOrders,
   generateFixtures,
   setMatchScore,
   type Team,
@@ -60,10 +61,14 @@ function normalizeTournament(raw: unknown): Tournament | null {
     typeof t.ownerUsername === "string" && t.ownerUsername.trim()
       ? t.ownerUsername.trim()
       : undefined;
+  const matches = Array.isArray(t.matches)
+    ? ensureMatchOrders(t.matches)
+    : [];
   return {
     ...t,
     participantType: coerceParticipantType(t.participantType),
     teams,
+    matches,
     ...(ownerUsername ? { ownerUsername } : { ownerUsername: undefined }),
   };
 }

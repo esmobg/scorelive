@@ -331,7 +331,9 @@ export const en = {
   "matches.statusPlayed": "Played",
   "matches.statusPending": "Waiting",
   "matches.statusUpcoming": "Upcoming",
+  "matches.statusBye": "Bye",
   "matches.waiting": "Waiting",
+  "matches.bye": "Bye",
   "matches.vs": "vs",
 
   "bracket.heading": "Knockout",

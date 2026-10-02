@@ -154,6 +154,7 @@ export function pairSwissRound(
   const unpaired = [...ordered];
   const matches: Match[] = [];
 
+  let byeTeam: Team | null = null;
   // Bye for lowest-ranked unpaired if odd (prefer someone who has not had a bye).
   if (unpaired.length % 2 === 1) {
     let byeIndex = unpaired.length - 1;
@@ -168,20 +169,12 @@ export function pairSwissRound(
         break;
       }
     }
-    const [byeTeam] = unpaired.splice(byeIndex, 1);
-    matches.push({
-      id: createId("m"),
-      stage: "swiss",
-      round,
-      label: `Swiss · Round ${round} · Bye`,
-      homeTeamId: byeTeam.id,
-      awayTeamId: null,
-      homeScore: 1,
-      awayScore: 0,
-    });
+    const [selected] = unpaired.splice(byeIndex, 1);
+    byeTeam = selected;
   }
 
   const remaining = [...unpaired];
+  let matchOrder = 1;
   while (remaining.length >= 2) {
     const home = remaining.shift()!;
     let awayIndex = remaining.findIndex(
@@ -196,11 +189,28 @@ export function pairSwissRound(
       id: createId("m"),
       stage: "swiss",
       round,
+      matchOrder,
       label: `Swiss · Round ${round}`,
       homeTeamId: home.id,
       awayTeamId: away.id,
       homeScore: null,
       awayScore: null,
+    });
+    matchOrder += 1;
+  }
+
+  if (byeTeam) {
+    matches.push({
+      id: createId("m"),
+      stage: "swiss",
+      round,
+      matchOrder,
+      label: `Swiss · Round ${round} · Bye`,
+      homeTeamId: byeTeam.id,
+      awayTeamId: null,
+      homeScore: 1,
+      awayScore: 0,
+      byeParticipantId: byeTeam.id,
     });
   }
 
