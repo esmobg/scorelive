@@ -20,33 +20,175 @@ function teams(...names: string[]): Team[] {
   }));
 }
 
+/** Pairing fingerprint without ephemeral match ids. */
+function scheduleFingerprint(
+  matches: ReturnType<typeof generateRoundRobinMatches>,
+) {
+  return matches.map((m) => ({
+    round: m.round,
+    matchOrder: m.matchOrder,
+    homeTeamId: m.homeTeamId,
+    awayTeamId: m.awayTeamId,
+    byeParticipantId: m.byeParticipantId,
+  }));
+}
+
+function roundRows(
+  matches: ReturnType<typeof generateRoundRobinMatches>,
+  round: number,
+) {
+  return matches
+    .filter((m) => m.round === round)
+    .sort((a, b) => a.matchOrder - b.matchOrder);
+}
+
 describe("round-robin", () => {
-  it("generates n*(n-1)/2 playable matches for even team counts", () => {
-    const t = teams("A", "B", "C", "D");
-    const matches = generateRoundRobinMatches(t);
-    const playable = matches.filter((m) => m.homeTeamId && m.awayTeamId);
-    expect(playable).toHaveLength(6);
-    expect(matches.every((m) => m.homeTeamId && m.awayTeamId)).toBe(true);
-    expect(matches.every((m) => m.matchOrder >= 1)).toBe(true);
+  it("returns empty for N < 2", () => {
+    expect(generateRoundRobinMatches([])).toEqual([]);
+    expect(generateRoundRobinMatches(teams("Solo"))).toEqual([]);
   });
 
-  it("handles odd team counts with one bye row per round", () => {
-    const t = teams("A", "B", "C");
-    const matches = generateRoundRobinMatches(t);
-    const playable = matches.filter((m) => m.homeTeamId && m.awayTeamId);
-    const byes = matches.filter(
-      (m) => Boolean(m.homeTeamId) !== Boolean(m.awayTeamId),
-    );
-    expect(playable).toHaveLength(3);
-    expect(byes).toHaveLength(3);
-    expect(matches.every((m) => m.homeTeamId || m.awayTeamId)).toBe(true);
+  /**
+   * Classic circle Round 1 (1-indexed names → tm0..tm{N-1}):
+   * odd N folds ends with mid bye; even N has no bye.
+   */
+  it.each([
+    {
+      n: 2,
+      round1: [{ home: "tm0", away: "tm1" }],
+    },
+    {
+      n: 3,
+      round1: [
+        { home: "tm0", away: "tm2" },
+        { home: "tm1", away: null },
+      ],
+    },
+    {
+      n: 4,
+      round1: [
+        { home: "tm0", away: "tm3" },
+        { home: "tm1", away: "tm2" },
+      ],
+    },
+    {
+      // TC-01
+      n: 5,
+      round1: [
+        { home: "tm0", away: "tm4" },
+        { home: "tm1", away: "tm3" },
+        { home: "tm2", away: null },
+      ],
+    },
+    {
+      n: 6,
+      round1: [
+        { home: "tm0", away: "tm5" },
+        { home: "tm1", away: "tm4" },
+        { home: "tm2", away: "tm3" },
+      ],
+    },
+    {
+      n: 7,
+      round1: [
+        { home: "tm0", away: "tm6" },
+        { home: "tm1", away: "tm5" },
+        { home: "tm2", away: "tm4" },
+        { home: "tm3", away: null },
+      ],
+    },
+  ] as const)("Round 1 circle pattern for N=$n", ({ n, round1 }) => {
+    const names = Array.from({ length: n }, (_, i) => String(i + 1));
+    const matches = generateRoundRobinMatches(teams(...names));
+    const r1 = roundRows(matches, 1);
+
+    expect(r1).toHaveLength(round1.length);
+    round1.forEach((expected, index) => {
+      expect(r1[index]).toMatchObject({
+        matchOrder: index + 1,
+        homeTeamId: expected.home,
+        awayTeamId: expected.away,
+        ...(expected.away === null
+          ? { byeParticipantId: expected.home }
+          : {}),
+      });
+    });
   });
+
+  it.each([2, 3, 4, 5, 6, 7] as const)(
+    "N=%s: full RR completeness, bye integrity, no double-booking",
+    (n) => {
+      const names = Array.from({ length: n }, (_, i) => String(i + 1));
+      const t = teams(...names);
+      const matches = generateRoundRobinMatches(t);
+      const playable = matches.filter((m) => m.homeTeamId && m.awayTeamId);
+      const expectedPairs = (n * (n - 1)) / 2;
+      const expectedRounds = n % 2 === 0 ? n - 1 : n;
+
+      expect(playable).toHaveLength(expectedPairs);
+      expect(matches.every((m) => m.matchOrder >= 1)).toBe(true);
+
+      const pairKeys = playable.map((m) =>
+        [m.homeTeamId!, m.awayTeamId!].sort().join("|"),
+      );
+      expect(new Set(pairKeys).size).toBe(expectedPairs);
+
+      const rounds = [...new Set(matches.map((m) => m.round))].sort(
+        (a, b) => a - b,
+      );
+      expect(rounds).toHaveLength(expectedRounds);
+
+      for (const round of rounds) {
+        const row = matches.filter((m) => m.round === round);
+        const byes = row.filter((m) => m.byeParticipantId);
+        const seen = new Set<string>();
+
+        if (n % 2 === 1) {
+          expect(byes).toHaveLength(1);
+          const byeId = byes[0].byeParticipantId!;
+          expect(
+            row.some(
+              (m) =>
+                m !== byes[0] &&
+                (m.homeTeamId === byeId || m.awayTeamId === byeId),
+            ),
+          ).toBe(false);
+        } else {
+          expect(byes).toHaveLength(0);
+          expect(row.every((m) => m.homeTeamId && m.awayTeamId)).toBe(true);
+        }
+
+        for (const match of row) {
+          for (const id of [match.homeTeamId, match.awayTeamId]) {
+            if (!id) continue;
+            expect(seen.has(id)).toBe(false);
+            seen.add(id);
+          }
+        }
+        expect(seen.size).toBe(n);
+
+        const orders = row.map((m) => m.matchOrder).sort((a, b) => a - b);
+        expect(orders).toEqual(
+          Array.from({ length: row.length }, (_, i) => i + 1),
+        );
+      }
+    },
+  );
+
+  it.each([2, 3, 4, 5, 6, 7] as const)(
+    "N=%s: regeneration with same input order is stable",
+    (n) => {
+      const names = Array.from({ length: n }, (_, i) => String(i + 1));
+      const t = teams(...names);
+      expect(scheduleFingerprint(generateRoundRobinMatches(t))).toEqual(
+        scheduleFingerprint(generateRoundRobinMatches(t)),
+      );
+    },
+  );
 
   it("TC-01: five participants round 1 is 1–5, 2–4, bye 3", () => {
     const t = teams("1", "2", "3", "4", "5");
-    const round1 = generateRoundRobinMatches(t)
-      .filter((m) => m.round === 1)
-      .sort((a, b) => a.matchOrder - b.matchOrder);
+    const round1 = roundRows(generateRoundRobinMatches(t), 1);
 
     expect(round1).toHaveLength(3);
     expect(round1[0]).toMatchObject({
@@ -65,63 +207,6 @@ describe("round-robin", () => {
       awayTeamId: null,
       byeParticipantId: "tm2",
     });
-  });
-
-  it("assigns one bye per odd round and never double-books a participant", () => {
-    const t = teams("1", "2", "3", "4", "5");
-    const matches = generateRoundRobinMatches(t);
-    const rounds = [...new Set(matches.map((m) => m.round))];
-    for (const round of rounds) {
-      const row = matches.filter((m) => m.round === round);
-      const byes = row.filter((m) => m.byeParticipantId);
-      expect(byes).toHaveLength(1);
-      const seen = new Set<string>();
-      for (const match of row) {
-        for (const id of [match.homeTeamId, match.awayTeamId]) {
-          if (!id) continue;
-          expect(seen.has(id)).toBe(false);
-          seen.add(id);
-        }
-      }
-      expect(seen.size).toBe(t.length);
-    }
-  });
-
-  it("even counts produce no byes", () => {
-    const t = teams("1", "2", "3", "4");
-    const matches = generateRoundRobinMatches(t);
-    expect(matches.every((m) => m.homeTeamId && m.awayTeamId)).toBe(true);
-  });
-
-  it("full RR has no duplicate pairs", () => {
-    const t = teams("1", "2", "3", "4", "5", "6");
-    const matches = generateRoundRobinMatches(t).filter(
-      (m) => m.homeTeamId && m.awayTeamId,
-    );
-    const keys = matches.map((m) =>
-      [m.homeTeamId!, m.awayTeamId!].sort().join("|"),
-    );
-    expect(keys).toHaveLength((6 * 5) / 2);
-    expect(new Set(keys).size).toBe(keys.length);
-  });
-
-  it("regeneration with the same participant order is stable", () => {
-    const t = teams("1", "2", "3", "4", "5");
-    const a = generateRoundRobinMatches(t).map((m) => ({
-      round: m.round,
-      matchOrder: m.matchOrder,
-      homeTeamId: m.homeTeamId,
-      awayTeamId: m.awayTeamId,
-      byeParticipantId: m.byeParticipantId,
-    }));
-    const b = generateRoundRobinMatches(t).map((m) => ({
-      round: m.round,
-      matchOrder: m.matchOrder,
-      homeTeamId: m.homeTeamId,
-      awayTeamId: m.awayTeamId,
-      byeParticipantId: m.byeParticipantId,
-    }));
-    expect(b).toEqual(a);
   });
 });
 

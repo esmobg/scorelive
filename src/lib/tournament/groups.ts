@@ -2,9 +2,19 @@ import type { Match, Team } from "./types";
 import { createId } from "./id";
 
 /**
- * Circle method round-robin: each team plays every other once.
- * Odd counts insert a bye so round 1 folds as 1–n, 2–(n-1), … middle bye.
- * Returns matches for a single group (or the whole field if no groups).
+ * Classic circle-method round-robin for any N ≥ 2.
+ *
+ * Builds an even-length circle: for odd participant counts, inserts a BYE at
+ * index ceil(N/2) (between the two halves). Each round pairs slot i with
+ * slot (circleSize − 1 − i), then rotates every slot except index 0.
+ *
+ * Round 1 pattern (1-indexed input order):
+ * - Odd N: 1–N, 2–(N−1), …, bye at (N+1)/2
+ *   e.g. N=5 → 1–5, 2–4, bye 3; N=7 → 1–7, 2–6, 3–5, bye 4
+ * - Even N: 1–N, 2–(N−1), …, N/2 – (N/2+1); no byes
+ *
+ * Full schedule: each unordered pair meets exactly once; same input order
+ * yields the same pairings and matchOrder. Fewer than 2 teams → [].
  */
 export function generateRoundRobinMatches(
   teams: Team[],
@@ -17,13 +27,13 @@ export function generateRoundRobinMatches(
   const { groupId, groupName } = options;
   const slots: (Team | null)[] = [...teams];
   if (slots.length % 2 === 1) {
-    // Insert bye between the two halves so round 1 is 1–n, 2–(n-1), bye middle.
+    // Mid-circle bye: round 1 folds ends → middle bye for every odd N.
     slots.splice(Math.ceil(slots.length / 2), 0, null);
   }
 
-  const n = slots.length;
-  const rounds = n - 1;
-  const half = n / 2;
+  const circleSize = slots.length;
+  const rounds = circleSize - 1;
+  const half = circleSize / 2;
   const matches: Match[] = [];
   const rotation = [...slots];
 
@@ -38,7 +48,7 @@ export function generateRoundRobinMatches(
 
     for (let i = 0; i < half; i += 1) {
       const home = rotation[i];
-      const away = rotation[n - 1 - i];
+      const away = rotation[circleSize - 1 - i];
 
       if (home && away) {
         playable.push({
@@ -85,7 +95,7 @@ export function generateRoundRobinMatches(
       matches.push({ ...byeMatch, matchOrder: order });
     }
 
-    // Rotate all but first slot
+    // Rotate all but first slot (classic circle method).
     const fixed = rotation[0];
     const rest = rotation.slice(1);
     rest.unshift(rest.pop()!);
